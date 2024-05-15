@@ -72,6 +72,14 @@ var mime = require('mime-types')
 var path = require('path')
 const cron = require('node-cron')
 
+const aws = require("aws-sdk");
+aws.config.update({
+  accessKeyID: process.env.accessKeyID,
+  secretAccessKey: process.env.secretAccessKey,
+  region: process.env.region, 
+})
+const s3 = new aws.S3();
+
 const dir___2 = '/var/www/html/eurobose-rest-apis/'
 const dir__1 = ''
 // * models
