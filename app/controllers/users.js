@@ -2904,6 +2904,7 @@ exports.getInvoiceUnpaid = async (req, res) => {
 // }
 
 exports.recordpayment = async (req, res) => {
+  console.log("incoming req", req.body);
   try {
     const invoice = await Invoice.findOne({ _id: req.params.id })
 
