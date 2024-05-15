@@ -71,3 +71,12 @@ typings/
 .env.production
 
 .history/
+
+
+# ignore configturation files
+adminFirebaseConfig.json
+
+# 
+acclem-social-firebase-adminsdk-t8sdb-4b56c0fa20.json
+
+
