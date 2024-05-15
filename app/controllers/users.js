@@ -2924,7 +2924,7 @@ exports.recordpayment = async (req, res) => {
         return res.status(400).json({code: 400, message: "only 2 media file(s) are allowed!"})
       }
       // path to save the images 
-      const uploadPath = path.join(__dirname, '..', '..', 'public', 'uploads')
+      const uploadPath = path.join('eurobose-rest-api', 'public', 'uploads');
       // will create the public/uploads folder if it doesn't exist!
       if (!fs.existsSync(uploadPath)) {
         fs.mkdirSync(uploadPath, { recursive: true })
