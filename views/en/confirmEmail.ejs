@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
+    <title>Invoice</title>
+</head>
+
+<style>
+    @font-face {
+        font-family: "";
+        src: url("https://use.typekit.net/af/841293/00000000000000007735b009/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n3&v=3") format("woff2"), url("https://use.typekit.net/af/841293/00000000000000007735b009/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n3&v=3") format("woff"), url("https://use.typekit.net/af/841293/00000000000000007735b009/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n3&v=3") format("opentype");
+        font-display: auto;
+        font-style: normal;
+        font-weight: 300;
+    }
+
+    @font-face {
+        font-family: "";
+        src: url("https://use.typekit.net/af/2ab381/00000000000000007735b011/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3") format("woff2"), url("https://use.typekit.net/af/2ab381/00000000000000007735b011/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3") format("woff"), url("https://use.typekit.net/af/2ab381/00000000000000007735b011/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3") format("opentype");
+        font-display: auto;
+        font-style: normal;
+        font-weight: 400;
+    }
+
+    @font-face {
+        font-family: "";
+        src: url("https://use.typekit.net/af/8c0f8e/00000000000000007735b01e/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff2"), url("https://use.typekit.net/af/8c0f8e/00000000000000007735b01e/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff"), url("https://use.typekit.net/af/8c0f8e/00000000000000007735b01e/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("opentype");
+        font-display: auto;
+        font-style: normal;
+        font-weight: 500;
+    }
+
+    @font-face {
+        font-family: "";
+        src: url("https://use.typekit.net/af/97dfb1/00000000000000007735b014/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("woff2"), url("https://use.typekit.net/af/97dfb1/00000000000000007735b014/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("woff"), url("https://use.typekit.net/af/97dfb1/00000000000000007735b014/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("opentype");
+        font-display: auto;
+        font-style: normal;
+        font-weight: 700;
+    }
+
+    @font-face {
+        font-family: "";
+        src: url("https://use.typekit.net/af/a3dc73/00000000000000007735b01a/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n9&v=3") format("woff2"), url("https://use.typekit.net/af/a3dc73/00000000000000007735b01a/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n9&v=3") format("woff"), url("https://use.typekit.net/af/a3dc73/00000000000000007735b01a/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n9&v=3") format("opentype");
+        font-display: auto;
+        font-style: normal;
+        font-weight: 900;
+    }
+
+    @media screen and (max-width: 414px) {
+
+        body {
+            text-align: center !important;
+            font-family: sans-serif;
+        }
+    }
+
+    tr {
+        width: 100%;
+    }
+
+    /* td {
+    width: 100%;
+  } */
+</style>
+
+
+<body
+    style="width:100%;height:100%;background:#e6e6e6;margin: 0;padding: 0 10px;box-sizing: border-box; text-align: left; font-weight: 390;">
+    <table cellspacing="0" cellpadding="0" width="100%"
+        style="background-color: #fff;padding: 0;border-collapse:collapse;margin: 50px auto;max-width: 500px;width: 100%;"
+        border="0">
+        <tbody>
+            <tr>
+                <td style="padding: 30px 30px 15px 30px;">
+                    <table style="width: 100%;">
+                        <tbody>
+                            <tr style=" text-align: center;">
+                                <td><img src=<%=logo%> alt="Dreeshah"
+                                        style="width: 100%; height: 100%; max-width: 150px; object-fit: contain;" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:30px;">
+                    <table style="width: 100%; box-shadow: 10px 10px #fff;">
+                        <tbody>
+                            <tr>
+                                <td style="color: #18364A;font-size: 18px;line-height: 25px; font-weight: 600;">Hi <%=name%></td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 16px;line-height: 28px;color: #000;padding-bottom: 10px; padding-top: 15px;
+                                font-weight: 400;">You recently added <span style="color: #1b5ecb; font-weight: 600;"><%=email%></span> to your Eurobose account.</td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 16px;line-height: 28px;color: #000;padding-bottom: 10px;
+                                font-weight: 400;">Please confirm this email address so that we can update your contact information.You may be asked to enter this confirmation code:</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center; padding-bottom: 20px; font-weight: 600;"><%=otp%></td>
+                            </tr>
+                            <tr>
+                                <td style="border-bottom: 2px solid #ddd;"></td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center; padding-top: 20px; color: grey;">
+                                    <b>from</b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center; padding-top: 10px;">Eurobose Dsp Tools</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>

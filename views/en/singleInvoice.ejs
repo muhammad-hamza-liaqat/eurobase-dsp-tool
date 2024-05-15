@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Template</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        #invoice {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #bill-from,
+        #bill-to {
+            width: 45%;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        #items {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        #footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="invoice">
+        <div id="header">
+            <img src="https://betazone1.promaticstechnologies.com/eurobose-rest-apis/public/imgs/euroboose-logo.png" alt="logo"/>
+        </div>
+
+        <div id="bill-from">
+            <h2>From:</h2>
+            <p>Eurobose<br>
+            XYZ<br>
+            XYZ, XYZ, 1233421<br>
+            Phone: (123) 456-7890<br>
+            Email: info@example.com</p>
+        </div>
+
+        <div id="bill-to">
+            <h2>To:</h2>
+            <p><%=invoice.clientId.firstName%> <%=invoice.clientId.lastName%><br>
+            <%=invoice.address%> <%=invoice.address1%> <%=invoice.address2%><br>
+            <%=invoice.town%>, <%=invoice.state%>, <%=invoice.postalCode%><br>
+            Phone: <%=invoice.phone%><br>
+            Email: <%=invoice.email%></p>
+        </div>
+
+        <div id="items">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+			<th>Discount %</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+<tbody>
+    <% invoice.parts.map((item) => { %>
+        <tr>
+            <td><%= item.description %></td>
+            <td><%= item.quantity %></td>
+            <td><%= item.price %></td>
+            <td><%= item.discount %></td> <!-- Display discount percentage -->
+           
+            <td><%= item.quantity * item.price * (1 - (item.discount / 100)) %></td> 
+        </tr>
+    <% }); %>
+</tbody>
+
+        </div>
+	<p>Total: <%=invoice.total%></p>
+
+       
+    </div>
+ <div id="footer">
+            <p>Thank you for your business!</p>
+        </div>
+</body>
+</html>
+

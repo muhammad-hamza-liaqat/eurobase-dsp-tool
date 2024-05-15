@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"e472a6e531e7499b9e353ba67fc2d0fa","collectionName":"invoicefreequotes","type":"collection"}

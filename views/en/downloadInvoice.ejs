@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users Data PDF</title>
+</head>
+<body>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th>Registration Number</th>
+                <th>Car Title</th>
+                <th>Model</th>
+                <th>Total Amount</th>
+                <th>Paid Amount</th>
+                <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% usersList?.forEach((user, index) => { %>
+                <tr>
+                    <td><%= index+1 %></td>
+                    <td><%= user.clientId?.firstName, %></td>
+                    <td><%= user.clientId?.lastName %></td>
+                    <td><%=user.clientId?.email %></td>
+                    <td><%= user.clientId?.phone %></td>
+                    <td><%= user.quotation_id?.regNumber %></td>
+                    <td><%=  user.quotation_id?.type_of_car?.main_title %></td>
+                    <td><%= user.quotation_id?.model %></td>
+                    <td><%= user.total%></td>
+                    <td><%= user.paid_amount %></td>
+                    <td><%= user.balance %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</body>
+</html>
+

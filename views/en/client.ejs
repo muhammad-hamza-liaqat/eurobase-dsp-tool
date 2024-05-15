@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
+      <title>NuStock :Tax Invoice</title>
+   </head>
+   <style>
+      @font-face {
+      font-family:"";
+      src:url("https://use.typekit.net/af/841293/00000000000000007735b009/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n3&v=3") format("woff2"),url("https://use.typekit.net/af/841293/00000000000000007735b009/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n3&v=3") format("woff"),url("https://use.typekit.net/af/841293/00000000000000007735b009/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n3&v=3") format("opentype");
+      font-display:auto;
+      font-style:normal;
+      font-weight:300;
+      }
+      @font-face {
+      font-family:"";
+      src:url("https://use.typekit.net/af/2ab381/00000000000000007735b011/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3") format("woff2"),url("https://use.typekit.net/af/2ab381/00000000000000007735b011/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3") format("woff"),url("https://use.typekit.net/af/2ab381/00000000000000007735b011/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3") format("opentype");
+      font-display:auto;
+      font-style:normal;
+      font-weight:400;
+      }
+      @font-face {
+      font-family:"";
+      src:url("https://use.typekit.net/af/8c0f8e/00000000000000007735b01e/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff2"),url("https://use.typekit.net/af/8c0f8e/00000000000000007735b01e/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff"),url("https://use.typekit.net/af/8c0f8e/00000000000000007735b01e/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("opentype");
+      font-display:auto;
+      font-style:normal;
+      font-weight:500;
+      }
+      @font-face {
+      font-family:"";
+      src:url("https://use.typekit.net/af/97dfb1/00000000000000007735b014/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("woff2"),url("https://use.typekit.net/af/97dfb1/00000000000000007735b014/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("woff"),url("https://use.typekit.net/af/97dfb1/00000000000000007735b014/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("opentype");
+      font-display:auto;
+      font-style:normal;
+      font-weight:700;
+      }
+      @font-face {
+      font-family:"";
+      src:url("https://use.typekit.net/af/a3dc73/00000000000000007735b01a/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n9&v=3") format("woff2"),url("https://use.typekit.net/af/a3dc73/00000000000000007735b01a/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n9&v=3") format("woff"),url("https://use.typekit.net/af/a3dc73/00000000000000007735b01a/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n9&v=3") format("opentype");
+      font-display:auto;
+      font-style:normal;
+      font-weight:900;
+      }
+      @media screen and (max-width: 414px) {
+      body {
+      text-align: center !important;
+      }
+      }
+      .set_fnt {
+      margin-bottom: 0px;
+      margin-top: 13px;
+      line-height: 18px;
+
+      }
+   </style>
+   <body style="width:100%; height:100%;background:#e6e6e6;margin: 0;padding: 0 10px;box-sizing: border-box; text-align: left; font-weight: 390;">
+      <table cellspacing="0" cellpadding="0" width="100%" style="background-color: #fff;padding: 0;border-collapse:collapse;margin: 50px auto;max-width: 812px; width: 100%; font-size: 14px;" border="0">
+         <tbody>
+            <!-- <tr>
+               <td height="20" style="background-color:#ddddfb;"></td>
+               </tr> -->
+            <tr>
+               <td style="padding: 20px 20px 0px;">
+                  <table cellspacing="0" cellpadding="0" style="border: 1px solid #787878; border-collapse: collapse;">
+                     <tbody>
+                        <tr>
+                           <td style="text-align: left;padding: 10px;" rowspan="2" width="809px;"><img src="<%= logo %>" alt="NuStock" style="width: 210px;height: auto; padding: 15px; " /></td>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <table cellspacing="0" cellpadding="0" style="border: 1px solid #787878; border-collapse: collapse;">
+                     <tbody>
+                        <tr>
+                           <!-- <td style="text-align: left; padding: 0 0 0 15px;"  width="809px;">
+                              <h3 style="margin-bottom: 0px; line-height: 22px;"> Invoice/Receipt</h3>
+                              <p style="margin-top: 0px;"> Order ID: <b> CS-04BF5-D9A0 </b></p>
+                           </td> -->
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </td>
+            </tr>
+            <tr>
+                <td style="padding: 0 20px;line-height: 25px;" colspan="2">
+                   <table cellspacing="0" cellpadding="0" width="100%" style="table-layout: fixed;">
+                      <tbody>
+                         <tr>
+                             <td style="line-height: 28px; width : 41%; padding: 10px; border: 1px solid #787878; border-collapse: collapse;" valign="top" rowspan="2">
+                                 <table cellspacing="0" cellpadding="0" width="100%">
+                                    <tbody>
+                                       <tr>
+                                          <td colspan="3" style="">
+                                             <b>
+                                             Nu Stock
+                                             </b>
+                                             <p class="set_fnt" style="margin: 10px 0 0px 0 ;"> NU STOCK IMAGES  </p>
+                                             <p class="set_fnt"><b>Phone: </b> (+91) 9811412664/9582555556</p>
+                                             <p class="set_fnt"><b> CIN: </b> NA</p>
+                                             <p class="set_fnt"><b>GSTIN : </b>07AADCM6333L1ZA</p>
+                                             <p style="margin-bottom: 0px;"> <b> PAN : </b> AASFN8209N </p> 
+                                             
+                                          </td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </td>
+                            <td  style="line-height: 39px;padding: 0px; border: 1px solid #787878; border-collapse: collapse;" valign="top" rowspan="2">
+                               <table cellspacing="0" cellpadding="0" width="100%">
+                                  <tbody>
+                                     <tr>
+                                       <td style=" border-bottom: 1px solid black; padding: 0 10px;"  > <b>Date :</b> <%= moment(order.createdAt).format("LLLL")%> </td>
+                                       <td style=" border: 1px solid black; padding: 0 10px; "  > <b>Invoice No.: </b> <%= order.invoice_number%></td>
+                                    </tr>
+                                     <tr>
+                                        <td style=" border-bottom: 1px solid black;padding: 0 10px; "  > <b>Order Confirmation No.: <%= order.order_number%> </b></td>
+                                        <td style=" border: 1px solid black; padding: 0 10px; "  > <b>HSN/SAC: </b>998382</td>  
+                                       </tr>
+                                      <tr>
+                                        <td style=" border-bottom: 1px solid black;    padding: 0px 10px;
+                                        line-height: 20px; "  > <b>Mode of Payment:</b>
+                                            <%= order.payment_data.payment_resp.card_name %></td>
+                                            <td style=" border: 1px solid black; line-height: 78px; width: 45%; padding: 0 10px;"  > <b>State Code: </b>07 / DLtd>
+                                      </tr>
+                                      <tr>
+                                        <td style=" border-bottom: 1px solid black;     padding: 0 10px;"  > <b>Payment Status: </b>Paid </td>
+                                        <td style=" border: 1px solid black; padding: 0 10px; "  > <b> State:</b> <%= order.billing_address.state %></td>
+
+                                      </tr>
+                                      <tr>
+                                        <td colspan="2" style=" border-bottom: 1px solid black; padding: 0 10px;"  > <b>Reverse Charges Applicability: </b> Not Applicable
+                                        <p style="margin: 0px;"> <b>Place of Supply:</b> <%= order.billing_address.state %></p>   
+                                       </td>
+                                      </tr>
+                                      
+                                  </tbody>
+                               </table>
+                            </td>
+                            <!-- <td style="line-height: 39px;padding: 0px; border: 1px solid #787878; border-collapse: collapse;" valign="top" rowspan="2">
+                               <table cellspacing="0" cellpadding="0" width="100%">
+                                  <tbody>
+                                    
+ 
+                                    <tr>
+                                        <td style=" border-bottom: 1px solid black; "  > <b>Invoice No.: </b>9310</td>
+                                      </tr>
+                                      <tr>
+                                         <td style=" border-bottom: 1px solid black; "  > <b>HSN/SAC: </b>998439</td>
+                                       </tr>
+                                       <tr>
+                                         <td style=" border-bottom: 1px solid black; line-height: 78px; "  > <b>State Code: </b>07 / DLtd>
+                                       </tr>
+                                       <tr>
+                                         <td style=" border-bottom: 1px solid black; "  > <b> State:</b> Delhi</td>
+                                       </tr>
+                                       <tr>
+                                         <td style=" border-bottom: 1px solid black; "  > cevef</td>
+                                       </tr>    
+                                    
+                                  </tbody>
+                               </table>
+                            </td> -->
+                         </tr>
+                       
+                      </tbody>
+                   </table>
+                </td>
+             </tr>
+             
+            <tr>
+               <td style="padding: 0 20px;line-height: 25px;" colspan="2">
+                  <table cellspacing="0" cellpadding="0" width="100%" style="table-layout: fixed;">
+                     <tbody>
+                        <tr>
+                            <td style="line-height: 28px;padding: 10px; border: 1px solid #787878; border-collapse: collapse;" valign="top" rowspan="2">
+                                <table cellspacing="0" cellpadding="0" width="100%">
+                                   <tbody>
+                                      <tr>
+                                         <td colspan="3" style="">
+                                            <b>
+                                                Party's Name:
+                                            </b>
+                                            <p class="set_fnt" style="margin: 10px 0 0px 0 ;line-height: 21px; line-break:anywhere; "><%= order.billing_address.company_name %>  </p>
+                                                 <!-- <p  class="set_fnt"><%= order.billing_address.street_address %></p> -->
+                                                 <p class="set_fnt" style="margin: 10px 0 0px 0 ;line-height: 21px; line-break: anywhere;"><%= order.billing_address.street_address %></p>
+                                                 <p class="set_fnt"><%= order.billing_address.country %></p>
+                                                 <p class="set_fnt"> <b>Pin Code:</b> <%= order.billing_address.zip %></p>
+                                                <p class="set_fnt"><b> State :</b> <%= order.billing_address.state %> </p>
+                                                <p class="set_fnt"><b>State Code:</b> 07/DL</p>
+                                                <p style="margin-bottom: 0px;"> <b>GSTIN:</b> 07AAFCB1692M1ZD</p>
+                                         </td>
+                                      </tr>
+                                   </tbody>
+                                </table>
+                             </td>
+                           <td style="line-height: 28px;padding: 10px; border: 1px solid #787878; border-collapse: collapse;" valign="top" rowspan="2">
+                              <table cellspacing="0" cellpadding="0" width="100%">
+                                 <tbody>
+                                    <tr>
+                                       <td colspan="3" style="">
+                                          <!-- <b>
+                                          Billed from:
+                                          </b> -->
+                                          <p class="set_fnt" style="margin: 10px 0 0px 0 ;"> <b>Client Name :</b> <%= order.billing_address.first_name %> <%= order.billing_address.last_name %>
+                                          </p>
+                                          <p class="set_fnt"><b>Order By :</b> <%= order.user_id.first_name %> <%= order.user_id.last_name %></p>
+                                          <!-- <p class="set_fnt"><b>P.O No :</b> // Cheque No-000413</p> -->
+                                          <!-- <p class="set_fnt">New York, NY 10118</p>
+                                          <p class="set_fnt">USA</p>
+                                          <p style="margin-bottom: 0px;"> EIN: 80-0812659</p>
+                                          <p style="
+                                             margin: 0px 0px;
+                                             line-height: 10px;
+                                             ">GST ID: 9921USA29013OSN</p> -->
+                                       </td>
+                                    </tr>
+                                 </tbody>
+                              </table>
+                           </td>
+                           <td style="line-height: 28px;padding: 10px; border: 1px solid #787878; border-collapse: collapse;" valign="top" rowspan="2">
+                              <table cellspacing="0" cellpadding="0" width="100%">
+                                 <tbody>
+                                    <tr>
+                                       <td width="40%" style="">
+                                          <!-- <b>
+                                          Billed from:
+                                          </b>
+                                          <p class="set_fnt" style="margin: 10px 0 0px 0 ;"> Deeptanshu Bansal </p>
+                                          <p class="set_fnt">V - 32/20, Basement</p>
+                                          <p class="set_fnt">DLF Phase 3</p>
+                                          <p class="set_fnt">New York, NY 10118</p>
+                                          <p class="set_fnt">USA</p>
+                                          <p style="margin-bottom: 0px;"> VAT#: 07AAFCB1692M1ZD</p>
+                                          <p style="
+                                             margin: 0px 0px;
+                                             line-height: 10px;
+                                             ">User ID: 350031551</p> -->
+                                       </td>
+
+                                       
+                                    </tr>
+                                 </tbody>
+                              </table>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </td>
+            </tr>
+            <tr>
+                <td style="padding: 0px 20px 20px 20px;">
+                    
+                    <table  width="100%" cellspacing="0" style="border: 1px solid #787878; border-collapse: collapse;">
+                        <thead>
+                            <th  style=" border: 1px solid #787878; border-collapse: collapse; height: 32px;
+                            text-align: center;
+                            background: #e7e7e7;" ></th>
+                            <th style=" border: 1px solid #787878; border-collapse: collapse; height: 32px;
+                            text-align: center;
+                            background: #e7e7e7;" > Item ID</th>
+                            <th  style=" border: 1px solid #787878; border-collapse: collapse; height: 32px;
+                            text-align: center;
+                            background: #e7e7e7;"  >Type </th>
+                            <th style=" border: 1px solid #787878; border-collapse: collapse; height: 32px;
+                            text-align: center;
+                            background: #e7e7e7;" > Dimensions (Pixels)</th>
+                            <th  style=" border: 1px solid #787878; border-collapse: collapse; height: 32px;
+                            text-align: center;
+                            background: #e7e7e7;" >Rights</th>
+                            <th style=" border: 1px solid #787878; border-collapse: collapse;height: 32px;
+                            text-align: center;
+                            background: #e7e7e7;" > Value</th>
+                        </thead>
+                        <tbody style="text-align: center;">
+                        <% for(var i=0; i< order.length; i++){
+                           var val = order[i]
+                           
+                        %>
+                           <tr>
+                               <td style=" border: 1px solid #787878; border-collapse: collapse;" ><img style="    height: 50px;
+                                   width: 50px;
+                                   object-fit: contain;
+                                   padding: 7px 1px;" src="<%= BASE_URL+'public/watermark/'+val.item_obj.cover_image.without_watermark %>"></td>
+                               <td style=" border: 1px solid #787878; border-collapse: collapse; text-align: center;
+                               height: 60px;" >Email:<%= val.email %> </td>
+                               <td style=" border: 1px solid #787878; border-collapse: collapse; text-align: center;
+                               height: 60px;" >phone:<%= val.phone%></td>
+                               <td style=" border: 1px solid #787878; border-collapse: collapse; text-align: center;
+                               height: 60px;" >postalCode:<%= val.postalCode%> at <%= val.available_size_obj.resolution%> </td>
+                               <td style=" border: 1px solid #787878; border-collapse: collapse; text-align: center;
+                               height: 60px;" > <%= order.payment_data.type == 'order' ? 'Non-Exclusive' : order.payment_data.type == 'exclusive_right' ? 'Exclusive' : 'Subscription'  %>  </td>
+                               <td style=" border: 1px solid #787878; border-collapse: collapse; text-align: center;
+                               height: 60px;" ><%= dollarIndianLocale.format(val.order_value) %></td>
+                               
+                           </tr>
+                        <% } %>
+                        <tr>
+                            <td colspan="5" style=" 
+                            height: 35px;
+                            text-align: right;
+                            padding: 0 5px;
+                       
+                         border: 1px solid #787878; border-collapse: collapse;" ><b>Total Value (INR)</b></td>
+                            <td  style=" border: 1px solid #787878; border-collapse: collapse;"> <%= dollarIndianLocale.format(order.sub_total)%></td>
+                        </tr>
+                        <tr>
+                            <td colspan="5" style=" 
+                            height: 35px;
+                            text-align: right;
+                            padding: 0 5px;
+                       
+                         border: 1px solid #787878; border-collapse: collapse;" ><b>Discount (INR)</b></td>
+                            <td  style=" border: 1px solid #787878; border-collapse: collapse;"> 0 </td>
+                        </tr>
+                        <tr>
+                            <td colspan="5" style=" 
+                            height: 35px;
+                            text-align: right;
+                            padding: 0 5px;
+                       
+                         border: 1px solid #787878; border-collapse: collapse;" ><b>GST Value @<%= order.payment_data.gst_applied %>% (INR) </b></td>
+                            <td  style=" border: 1px solid #787878; border-collapse: collapse;"><%= dollarIndianLocale.format(order.total - order.sub_total)%></td>
+                        </tr>
+                       <!--  <tr>
+                            <td colspan="5" style=" 
+                            height: 35px;
+                            text-align: right;
+                            padding: 0 5px;
+                       
+                         border: 1px solid #787878; border-collapse: collapse;" ><b>CGST Value @9% (INR)</b></td>
+                            <td  style=" border: 1px solid #787878; border-collapse: collapse;"> 2258.50</td>
+                        </tr> -->
+
+                        <tr>
+                            <td colspan="4" style="text-align: left;
+                            height: 35px;
+                            background: #e7e7e7;     padding: 0 6px;  border-bottom: 1px solid #787878"><b>Total Amount before GST (SGST / UGST / CGST / IGST)</b></td>
+                            <td colspan="3" style="text-align: right;
+                            height: 35px;
+                            background: #e7e7e7;     padding: 0 6px;border-bottom: 1px solid #787878"> <b><%= dollarIndianLocale.format(order.sub_total)%></b></td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" style="text-align: left;
+                            height: 35px;
+                            background: #e7e7e7;     padding: 0 6px;border-bottom: 1px solid #787878"><b>Total Amount Payable inclusive of GST (SGST / UGST / CGST / IGST) </b></td>
+                            <td colspan="3" style="text-align: right;
+                            height: 35px;
+                            background: #e7e7e7;border-bottom: 1px solid #787878; padding: 0 6px; "> <b><%= dollarIndianLocale.format(order.total)%></b></td>
+                        </tr>
+                        <tr>
+                            <td colspan="7" style="height: 50px;border-bottom: 1px solid #787878;">NU Stock is a unit of Mash Audio Visuals Pvt. Ltd. Usage of content subject to Mash Rights Agreement
+                                mentioned on  our website.</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" style="border-right: 1px solid #787878; text-align: left;padding: 20px 15px;   ">
+                                <b> Terms & Conditions:</b>
+                                <p class="set_fnt">1. Payment must reach us before due date. Interest @24% p.a. will be
+                                    levied on all delayed payments</p>
+                                <p class="set_fnt">2. Payment to be made in favour of Mash Audio Visuals Pvt. Ltd. payable
+                                    at Delhi and send to our address mentioned above.</p> 
+                                <p class="set_fnt">3. Kindly mention on the reverse of the cheque the order Confirmation
+                                    No. and Invoice No. against which the amount is paid.</p>
+                                <p class="set_fnt">If you have any problem with your order, please call us at 649758587 or send us a message at</p>               
+                                 </td>
+                                 <td colspan="4" style="    vertical-align: baseline;
+                                 width: 25%;
+                                 align-items: center;     position: relative; padding: 10px 0px;"><b> For NuStock</b>
+                                 <b style="    position: absolute;
+                                 left: 36px;
+                                 bottom: 9px;
+                             ">Authorised Signatory</b></td>
+                        </tr>
+                        <tr>
+                            <td colspan="7" style="height: 50px;border: 1px solid #787878; font-size: 20px;">
+                                <b>WE THANK YOU FOR YOUR BUSINESS. WE VALUE YOUR PATRONAGE</b></td>
+                        </tr>
+                        
+                        </tbody>
+                    </table> 
+            </tr>
+            
+         </tbody>
+      </table>
+   </body>
+</html>

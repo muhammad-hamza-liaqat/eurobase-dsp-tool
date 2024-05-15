@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ 	 <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Acclem : Switch Permission</title>
+	<!-- Favicon -->
+    <link rel="icon" href="assets/img/brand/favicon.png" type="image/png">
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700">
+    <!-- Icons -->
+    <link rel="stylesheet" href="assets/vendor/nucleo/css/nucleo.css" type="text/css">
+    <link rel="stylesheet" href="assets/vendor/@fortawesome/fontawesome-free/css/all.min.css" type="text/css">
+    <!-- Page plugins -->
+    <!-- Argon CSS -->
+    <link rel="stylesheet" href="assets/css/argon.css?v=1.2.0" type="text/css">
+	<!-- <link href='http://fonts.googleapis.com/css?family=Raleway:400,100,200,300,500,600,800,700,900' rel='stylesheet' type='text/css'> -->
+</head>
+<style type="text/css">
+	.d-flex{
+		display: flex; justify-content: center; gap: 16px;
+	}
+</style>
+<body style="width:100%; font-family: 'Raleway'; height:100%; background:#F0F0F0; margin:50px 0;">
+	<table cellspacing="0" cellpadding="0" width="800" style="background-color: #fff;padding: 0;border-collapse:collapse;margin: 0 auto; " border="0">
+		<tbody>
+			<tr>
+				<td height="50"></td>
+			</tr>
+			<tr>
+				<td style="text-align: center;padding: 0 40px;">
+					<img src="https://developers.promaticstechnologies.com/acclem-rest-apis/public/imgs/logo.png"
+                        alt="Acclem" style="width: 270px;" />
+                </td>
+			<tr>
+				<td height="50"></td>
+			</tr>
+			<tr>
+				<td style="padding: 0 40px;color: #18364A;font-weight: bold;font-size: 30px; text-align: center;">
+					Hi, <%= name%>!
+				</td>
+			</tr>
+			<tr>
+				<td height="30"></td>
+			</tr>
+			<% if ( permission  == 'approved' ) { %>
+			    <tr>
+				<td style="padding: 30px 40px; background: #13a213; color: #fff;font-weight: bold;font-size: 20px; text-align: center;">We are <%= permission%> your switch request in our website!</td>
+				</tr>
+			<% } else if ( permission =='disapproved') { %>
+			    <tr>
+				<td style="padding: 30px 40px; background: #dd1b3c; color: #fff;font-weight: bold;font-size: 20px; text-align: center;">We are <%= permission%> your switch request in our website!</td>
+			</tr>
+			<% } else { %>
+			<% } %>
+			
+
+			
+			
+			<tr>
+				<td height="30"></td>
+			</tr>
+			<tr>
+				<td style="padding: 0 40px;color: #18364A;font-size: 16px;font-weight: bold; text-align: center;">Here is what happens next:</td>
+			</tr>
+			<tr>
+				<td height="10"></td>
+			</tr>
+			<tr>
+				<td height="10"></td>
+			</tr>
+			<tr>
+				<td style="text-align: center;padding: 0 50px;color: #2b2b2b;line-height: 28px;font-size: 16px;font-weight: bold; ">
+					Have any additional questions? Email us at <a href="javascript:void(0)" style="text-decoration: none;color: #DD1B3C; ">clientcare@Acclem.com</a> and we will get back to you.
+				</td>
+			</tr>
+			<tr>
+				<td height="50"></td>
+			</tr>
+			<tr>
+				<td style="padding: 0 40px;font-size: 16px;line-height: 28px; text-align: center;">
+					<span style="font-weight: bold;color: #18364A;">Thanks,</span><br>
+					The Acclem Team
+				</td>
+			</tr>
+			<tr>
+                <td style="padding: 10px 40px;font-size: 15px;line-height: 25px; text-align: center; ">
+                    <a style="color: #03023e;" href="<%= website_url %>"> www.acclem.com </a>
+                </td>
+            </tr>
+            <tr>
+				<td style="text-align: center;">
+					<table style="margin: auto;">
+						<tr   cellspacing="2">
+							<td style="padding: 0px 8px;">
+								<div>
+									<svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path d="M10.946 5.33081C7.84058 5.33081 5.33569 7.83569 5.33569 10.9412C5.33569 14.0466 7.84058 16.5515 10.946 16.5515C14.0515 16.5515 16.5564 14.0466 16.5564 10.9412C16.5564 7.83569 14.0515 5.33081 10.946 5.33081ZM10.946 14.5886C8.93921 14.5886 7.29858 12.9529 7.29858 10.9412C7.29858 8.92944 8.93433 7.2937 10.946 7.2937C12.9578 7.2937 14.5935 8.92944 14.5935 10.9412C14.5935 12.9529 12.9529 14.5886 10.946 14.5886ZM18.0945 5.10132C18.0945 5.82886 17.5085 6.40991 16.7859 6.40991C16.0584 6.40991 15.4773 5.82397 15.4773 5.10132C15.4773 4.37866 16.0632 3.79272 16.7859 3.79272C17.5085 3.79272 18.0945 4.37866 18.0945 5.10132ZM21.8103 6.42944C21.7273 4.67651 21.3269 3.12378 20.0427 1.84448C18.7634 0.565185 17.2107 0.164795 15.4578 0.0769043C13.6511 -0.0256348 8.23608 -0.0256348 6.42944 0.0769043C4.6814 0.159912 3.12866 0.560303 1.84448 1.8396C0.560303 3.1189 0.164795 4.67163 0.0769043 6.42456C-0.0256348 8.2312 -0.0256348 13.6462 0.0769043 15.4529C0.159912 17.2058 0.560303 18.7585 1.84448 20.0378C3.12866 21.3171 4.67651 21.7175 6.42944 21.8054C8.23608 21.908 13.6511 21.908 15.4578 21.8054C17.2107 21.7224 18.7634 21.322 20.0427 20.0378C21.322 18.7585 21.7224 17.2058 21.8103 15.4529C21.9128 13.6462 21.9128 8.23608 21.8103 6.42944ZM19.4763 17.3914C19.0955 18.3484 18.3582 19.0857 17.3962 19.4714C15.9558 20.0427 12.5378 19.9109 10.946 19.9109C9.35425 19.9109 5.9314 20.0378 4.49585 19.4714C3.53882 19.0906 2.80151 18.3533 2.41577 17.3914C1.84448 15.9509 1.97632 12.533 1.97632 10.9412C1.97632 9.34937 1.84937 5.92651 2.41577 4.49097C2.79663 3.53394 3.53394 2.79663 4.49585 2.41089C5.93628 1.8396 9.35425 1.97144 10.946 1.97144C12.5378 1.97144 15.9607 1.84448 17.3962 2.41089C18.3533 2.79175 19.0906 3.52905 19.4763 4.49097C20.0476 5.9314 19.9158 9.34937 19.9158 10.9412C19.9158 12.533 20.0476 15.9558 19.4763 17.3914Z" fill="black"/>
+									</svg>
+								</div>
+							</td>
+							<td style="padding: 0px 8px;">
+								<div >
+									<svg width="25" height="21" viewBox="0 0 25 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path d="M22.4302 5.06025C22.446 5.28232 22.446 5.50444 22.446 5.72651C22.446 12.5 17.2906 20.3045 7.86802 20.3045C4.96509 20.3045 2.26841 19.4638 0 18.0044C0.412451 18.052 0.808984 18.0679 1.2373 18.0679C3.63257 18.0679 5.83755 17.2589 7.59834 15.8788C5.3458 15.8312 3.45811 14.356 2.80771 12.3255C3.125 12.373 3.44224 12.4048 3.77539 12.4048C4.2354 12.4048 4.69546 12.3413 5.12373 12.2303C2.77603 11.7544 1.01519 9.69224 1.01519 7.20176V7.13833C1.69727 7.51904 2.49048 7.75698 3.33115 7.78867C1.95107 6.8686 1.04692 5.29819 1.04692 3.52153C1.04692 2.56978 1.30068 1.69731 1.74487 0.935889C4.26709 4.04502 8.05835 6.07544 12.3096 6.29756C12.2303 5.91685 12.1827 5.52031 12.1827 5.12373C12.1827 2.3001 14.4669 0 17.3064 0C18.7816 0 20.1141 0.618652 21.05 1.61802C22.208 1.39595 23.3184 0.967627 24.302 0.380713C23.9212 1.57046 23.1122 2.56982 22.0494 3.2043C23.0805 3.09331 24.0799 2.80771 24.9999 2.41118C24.3021 3.42637 23.4295 4.33052 22.4302 5.06025Z" fill="black"/>
+									</svg>
+								</div>
+							</td>
+							<td style="padding: 0px 8px;">
+								<div>
+									<svg width="11" height="21" viewBox="0 0 11 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path d="M10.2792 11.8125L10.8496 8.01199H7.28306V5.54572C7.28306 4.50598 7.78127 3.49248 9.3786 3.49248H11V0.256758C11 0.256758 9.52863 0 8.12184 0C5.18471 0 3.26486 1.82027 3.26486 5.11547V8.01199H0V11.8125H3.26486V21H7.28306V11.8125H10.2792Z" fill="black"/>
+									</svg>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td height="50"></td>
+			</tr>
+		</tbody>
+	</table>
+</body>
+</html>
