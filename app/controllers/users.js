@@ -72,13 +72,16 @@ var mime = require('mime-types')
 var path = require('path')
 const cron = require('node-cron')
 
-const aws = require("aws-sdk");
-aws.config.update({
-  accessKeyID: process.env.accessKeyID,
-  secretAccessKey: process.env.secretAccessKey,
-  region: process.env.region, 
-})
-const s3 = new aws.S3();
+// const AWS = require("aws-sdk");
+
+// const contaboEndpoint = new AWS.Endpoint(process.env.CONTABO_END_POINT);
+
+// const cos = new AWS.S3({
+//   endpoint: contaboEndpoint,
+//   accessKeyId: process.env.ACCESS_KEY_ID,
+//   secretAccessKey: process.env.SECRET_ACCESS_KEY_ID,
+//   s3BucketEndpoint: true,
+// });
 
 const dir___2 = '/var/www/html/eurobose-rest-apis/'
 const dir__1 = ''
@@ -2911,136 +2914,120 @@ exports.getInvoiceUnpaid = async (req, res) => {
 //   }
 // }
 
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+
+const s3Client = new S3Client({
+  region: process.env.REGION,
+  credentials: {
+    accessKeyId: process.env.ACCESS_KEY_ID,
+    secretAccessKey: process.env.SECRET_ACCESS_KEY_ID,
+  },
+  endpoint: process.env.CONTABO_END_POINT, 
+});
+
+
 exports.recordpayment = async (req, res) => {
-  console.log("incoming req", req.body);
   try {
-    const invoice = await Invoice.findOne({ _id: req.params.id })
+
+    const file = req.files?.fileToUpload || null;
+    console.log("file", file);
+    console.log(req.files)
+    const invoice = await Invoice.findOne({ _id: req.params.id });
 
     if (!invoice) {
-      return res.status(404).send({ message: 'invoice not found', code: 404 })
+      return res.status(404).send({ message: 'Invoice not found', code: 404 });
     }
 
-    let mediaPaths = []
-    console.log(req.files)
-    if (req.files && req.files.media) {
-      console.log('Media files detected:', req.files.media)
+    let mediaPath = '';
 
-      const media = Array.isArray(req.files.media)
-        ? req.files.media
-        : [req.files.media]
+    if (file) {
+      console.log('Media file detected:', file);
 
-      if (media.length > 2){
-        return res.status(400).json({code: 400, message: "only 2 media file(s) are allowed!"})
+      const fileExtension = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExtension}`; // Generate a unique file name
+      const fileKey = `images/${fileName}`;
+      const uploadParams = {
+        Bucket: "eurobase-media", 
+        Key: fileKey,
+        Body: file.data,
+        ACL: 'public-read',
+        ContentType: file.mimetype,
+      };
+
+      try {
+        const uploadResult = await s3Client.send(new PutObjectCommand(uploadParams));
+        console.log('Media file uploaded successfully:', uploadResult.Location);
+        mediaPath = uploadResult.Location;
+      } catch (uploadError) {
+        console.error('Error uploading media file:', uploadError);
+        return res.status(500).json({ code: 500, message: 'Error uploading media file' });
       }
-      // path to save the images 
-      const uploadPath = path.join(__dirname, '..', '..', 'public', 'uploads')
-      // will create the public/uploads folder if it doesn't exist!
-      if (!fs.existsSync(uploadPath)) {
-        fs.mkdirSync(uploadPath, { recursive: true })
-      }
-      console.log('Upload path:', uploadPath)
+    }
 
-      for (let i = 0; i < media.length; i++) {
-        const mediaPath = path.join(uploadPath, media[i].name)
-        try {
-          await media[i].mv(mediaPath)
-          console.log('Media file saved successfully:', mediaPath)
-          mediaPaths.push(mediaPath)
-        } catch (moveError) {
-          console.error('Error moving media file:', moveError)
+    let newInvoiceStatus = invoice.status;
+    let newBalance = invoice.balance;
+    let newPaidAmount = invoice.paid_amount;
+
+    if (invoice.status === 'unpaid' || invoice.status === 'partially_paid') {
+      if (['cash', 'cheque', 'virement'].includes(req.body.payment_method)) {
+        const paidAmount = Number(req.body.paid_amount);
+
+        newBalance -= paidAmount;
+        newPaidAmount += paidAmount;
+
+        if (newBalance <= 0) {
+          newInvoiceStatus = 'fully_paid';
+          newBalance = 0;
+        } else {
+          newInvoiceStatus = 'partially_paid';
         }
       }
-
-      console.log('Media paths:', mediaPaths)
     }
 
-    if (invoice.status === 'unpaid') {
-      if (
-        req.body.payment_method === 'cash' ||
-        req.body.payment_method === 'cheque' ||
-        req.body.payment_method === 'virement'
-      ) {
-        const newBalance = Number(invoice.total) - Number(req.body.paid_amount)
-        const filter =
-          Math.floor(req.body.paid_amount) === Math.floor(Number(invoice.total))
-            ? {
-                status: 'fully_paid',
-                balance: 0,
-                paid_amount: req.body.paid_amount
-              }
-            : {
-                status: 'partially_paid',
-                balance: newBalance,
-                paid_amount: req.body.paid_amount
-              }
+    const filter = {
+      status: newInvoiceStatus,
+      balance: newBalance,
+      paid_amount: newPaidAmount
+    };
 
-        await Invoice.findOneAndUpdate({ _id: req.params.id }, { $set: filter })
-      }
-    } else if (invoice.status === 'partially_paid') {
-      if (
-        req.body.payment_method === 'cash' ||
-        req.body.payment_method === 'cheque' ||
-        req.body.payment_method === 'virement'
-      ) {
-        const newBalance =
-          Number(invoice.balance) - Number(req.body.paid_amount)
-        const newPaidAmount =
-          Number(invoice.paid_amount) + Number(req.body.paid_amount)
-        const filter =
-          Math.floor(req.body.paid_amount) === Math.floor(Number(invoice.total))
-            ? {
-                status: 'fully_paid',
-                balance: 0,
-                paid_amount: newPaidAmount
-              }
-            : {
-                status: 'partially_paid',
-                balance: newBalance,
-                paid_amount: newPaidAmount
-              }
+    await Invoice.findOneAndUpdate({ _id: req.params.id }, filter);
 
-        await Invoice.findOneAndUpdate({ _id: req.params.id }, filter)
-      }
-    }
-
-    const updateFields = {}
-
+    const updateFields = {};
     if (req.body.comment) {
-      updateFields.comment = req.body.comment
+      updateFields.comment = req.body.comment;
     }
-
     if (req.body.received_from) {
-      updateFields.received_from = req.body.received_from
+      updateFields.received_from = req.body.received_from;
     }
-
     if (req.body.transaction_id) {
-      updateFields.transaction_id = req.body.transaction_id
+      updateFields.transaction_id = req.body.transaction_id;
     }
 
     const update_invoice = await Invoice.findByIdAndUpdate(
       req.params.id,
       updateFields,
       { new: true }
-    )
+    );
 
-    if (mediaPaths.length === 0) {
+    if (mediaPath === '') {
       return res.status(200).json({
         code: 200,
         message: 'Recorded successfully',
         data: update_invoice
-      })
+      });
     } else {
       return res.status(200).json({
         code: 200,
-        message: 'Recorded successfully & images uploaded',
-        data: { payment: update_invoice, images: mediaPaths }
-      })
+        message: 'Recorded successfully & image uploaded',
+        data: { payment: update_invoice, image: mediaPath }
+      });
     }
   } catch (error) {
-    console.error(JSON.stringify(error))
-    return res.status(500).json({ code: 500, message: 'Internal Server Error' })
+    console.error(JSON.stringify(error));
+    return res.status(500).json({ code: 500, message: 'Internal Server Error' });
   }
-}
+};
+
 
 exports.getAllInvoices = async (req, res) => {
   try {
