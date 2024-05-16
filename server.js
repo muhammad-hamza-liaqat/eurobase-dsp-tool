@@ -35,34 +35,35 @@ const swaggerDocument = require("./swagger-a.json");
 app.set("port", process.env.PORT || 9000);
 
 // Enable only in development HTTP request logger middleware
-// if (process.env.NODE_ENV === "development") {
-//   app.use(morgan("dev"));
-//   var options = {
-//     key: fs.readFileSync(
-//       "/etc/letsencrypt/live/betazone1.promaticstechnologies.com/privkey.pem",
-//       "utf8"
-//     ),
-//     cert: fs.readFileSync(
-//       "/etc/letsencrypt/live/betazone1.promaticstechnologies.com/fullchain.pem",
-//       "utf8"
-//     ),
-//   };
-//   console.log("=======chek server");
-//   var httpsServer = https.createServer(options, app);
-//   httpsServer.listen(app.get("port"), function () {
-//     console.log("socket running on port no : " + app.get("port"));
-//   });
-//   console.log("=======check w2 serser`  ");
-// } else {
-//   var httpsServer = http.createServer(app).listen(8000);
-//   // httpsServer.listen(app.get('port'), function () {
-//   //   console.log('socket running on port no : ' + app.get('port'))
-//   // })
-//   console.log("=======check Local Server` ");
-//   app.listen(5000, function () {
-//     console.log("listening on port no : " + 5000);
-//   });
-// }
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+  // var options = {
+  //   key: fs.readFileSync(
+  //     "/etc/letsencrypt/live/betazone1.promaticstechnologies.com/privkey.pem",
+  //     "utf8"
+  //   ),
+  //   cert: fs.readFileSync(
+  //     "/etc/letsencrypt/live/betazone1.promaticstechnologies.com/fullchain.pem",
+  //     "utf8"
+  //   ),
+  // };
+  console.log("=======chek server");
+  // var httpsServer = https.createServer(options, app);
+  var httpsServer = https.createServer( app);
+  httpsServer.listen(app.get("port"), function () {
+    console.log("socket running on port no : " + app.get("port"));
+  });
+  console.log("=======check w2 serser`  ");
+} else {
+  var httpsServer = http.createServer(app).listen(8000);
+  // httpsServer.listen(app.get('port'), function () {
+  //   console.log('socket running on port no : ' + app.get('port'))
+  // })
+  console.log("=======check Local Server` ");
+  app.listen(5000, function () {
+    console.log("listening on port no : " + 5000);
+  });
+}
 
 // Redis cache enabled by env variable
 if (process.env.USE_REDIS === "true") {
