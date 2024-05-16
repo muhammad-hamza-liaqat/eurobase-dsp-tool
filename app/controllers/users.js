@@ -69,16 +69,9 @@ var pdf = require('html-pdf')
 var mime = require('mime-types')
 var path = require('path')
 const cron = require('node-cron')
+const {uploadImage} = require('../utils/helper')
 
-// aws s3 with contabo config
 
-const aws = require('aws-sdk')
-const s3 = new aws.S3({
-  endpoint: process.env.CONTABO_END_POINT,
-  accessKeyId: process.env.ACCESS_KEY_ID,
-  secretAccessKey: process.env.SECRET_ACCESS_KEY_ID,
-  s3BucketEndpoint: true
-})
 
 const dir___2 = '/var/www/html/eurobose-rest-apis/'
 const dir__1 = ''
@@ -2911,64 +2904,33 @@ exports.getInvoiceUnpaid = async (req, res) => {
 //   }
 // }
 
+
 exports.recordpayment = async (req, res) => {
   try {
-    const frontImageFile = req.files?.frontImage || null;
-    const backImageFile = req.files?.backImage || null;
-    const invoice = await Invoice.findOne({ _id: req.params.id });
+    console.log("req.body incoming", req.body);
+    console.log("req.files", req.files);
+    const frontImageFile = req.files?.frontImage || null
+    const backImageFile = req.files?.backImage || null
+    const invoice = await Invoice.findOne({ _id: req.params.id })
 
     if (!invoice) {
-      return res.status(404).send({ message: 'Invoice not found', code: 404 });
+      return res.status(404).send({ message: 'Invoice not found', code: 404 })
     }
 
-    let frontImagePath = invoice.frontImage || '';
-    let backImagePath = invoice.backImage || '';
+    let frontImagePath = invoice.frontImage
+    let backImagePath = invoice.backImage
 
     if (frontImageFile) {
-      console.log('Front Image file detected:', frontImageFile);
-
-      const { name, mimetype, data } = frontImageFile;
-      const fileContent = Buffer.from(data, 'binary');
-
-      const fileExtension = name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExtension}`;
-      const fileKey = `images/${fileName}`;
-
-      const putParams = {
-        Bucket: 'eurobase-media',
-        Key: fileKey,
-        Body: fileContent,
-        ACL: 'public-read',
-        ContentType: mimetype
-      };
-
-      await s3.putObject(putParams).promise();
-      frontImagePath = `${process.env.CONTABO_END_POINT_IMAGE}/${putParams.Key}`;
-      console.log('Front Image uploaded successfully:', frontImagePath);
+      console.log('Front Image file detected:', frontImageFile)
+      frontImagePath = await uploadImage(frontImageFile)
     }
 
     if (backImageFile) {
-      console.log('Back Image file detected:', backImageFile);
-
-      const { name, mimetype, data } = backImageFile;
-      const fileContent = Buffer.from(data, 'binary');
-
-      const fileExtension = name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExtension}`;
-      const fileKey = `images/${fileName}`;
-
-      const putParams = {
-        Bucket: 'eurobase-media',
-        Key: fileKey,
-        Body: fileContent,
-        ACL: 'public-read',
-        ContentType: mimetype
-      };
-
-      await s3.putObject(putParams).promise();
-
-      backImagePath = `${process.env.CONTABO_END_POINT_IMAGE}/${putParams.Key}`;
-      console.log('Back Image uploaded successfully:', backImagePath);
+      console.log('Back Image file detected:', backImageFile)
+      backImagePath = await uploadImage(backImageFile).catch((error) => {
+        console.error('Error uploading back image:', error)
+        throw new Error('Failed to upload back image')
+      })
     }
 
     if (invoice.status === 'unpaid') {
@@ -2977,7 +2939,7 @@ exports.recordpayment = async (req, res) => {
         req.body.payment_method === 'cheque' ||
         req.body.payment_method === 'virement'
       ) {
-        const newBalance = Number(invoice.total) - Number(req.body.paid_amount);
+        const newBalance = Number(invoice.total) - Number(req.body.paid_amount)
         const filter =
           Math.floor(req.body.paid_amount) === Math.floor(Number(invoice.total))
             ? {
@@ -2989,9 +2951,9 @@ exports.recordpayment = async (req, res) => {
                 status: 'partially_paid',
                 balance: newBalance,
                 paid_amount: req.body.paid_amount
-              };
+              }
 
-        await Invoice.findOneAndUpdate({ _id: req.params.id }, { $set: filter });
+        await Invoice.findOneAndUpdate({ _id: req.params.id }, { $set: filter })
       }
     } else if (invoice.status === 'partially_paid') {
       if (
@@ -2999,8 +2961,10 @@ exports.recordpayment = async (req, res) => {
         req.body.payment_method === 'cheque' ||
         req.body.payment_method === 'virement'
       ) {
-        const newBalance = Number(invoice.balance) - Number(req.body.paid_amount);
-        const newPaidAmount = Number(invoice.paid_amount) + Number(req.body.paid_amount);
+        const newBalance =
+          Number(invoice.balance) - Number(req.body.paid_amount)
+        const newPaidAmount =
+          Number(invoice.paid_amount) + Number(req.body.paid_amount)
         const filter =
           Math.floor(req.body.paid_amount) === Math.floor(Number(invoice.total))
             ? {
@@ -3012,60 +2976,62 @@ exports.recordpayment = async (req, res) => {
                 status: 'partially_paid',
                 balance: newBalance,
                 paid_amount: newPaidAmount
-              };
+              }
 
-        await Invoice.findOneAndUpdate({ _id: req.params.id }, filter);
+        await Invoice.findOneAndUpdate({ _id: req.params.id }, filter)
       }
     }
 
-    const updateFields = {};
+    const updateFields = {}
 
     if (req.body.comment) {
-      updateFields.comment = req.body.comment;
+      updateFields.comment = req.body.comment
     }
 
     if (req.body.recieved_from) {
-      updateFields.recieved_from = req.body.recieved_from;
+      updateFields.recieved_from = req.body.recieved_from
     }
 
     if (req.body.transaction_id) {
-      updateFields.transaction_id = req.body.transaction_id;
+      updateFields.transaction_id = req.body.transaction_id
     }
 
     if (frontImagePath) {
-      updateFields.frontImage = frontImagePath;
+      updateFields.frontImage = frontImagePath
     }
 
     if (backImagePath) {
-      updateFields.backImage = backImagePath;
+      updateFields.backImage = backImagePath
     }
 
     const updatedInvoice = await Invoice.findByIdAndUpdate(
       req.params.id,
       { $set: updateFields },
       { new: true }
-    );
+    )
 
     let responseData = {
       code: 200,
       message: 'Recorded successfully',
       data: updatedInvoice
-    };
-
-    if (frontImagePath && backImagePath) {
-      responseData.message = 'Recorded successfully & images uploaded';
-    } else if (frontImagePath || backImagePath) {
-      responseData.message = 'Recorded successfully & image uploaded';
-    } else {
-      responseData.message = 'Recorded successfully';
     }
 
-    return res.status(200).json(responseData);
+    if (frontImagePath && backImagePath) {
+      responseData.message = 'Recorded successfully & images uploaded'
+    } else if (frontImagePath || backImagePath) {
+      responseData.message = 'Recorded successfully & image uploaded'
+    } else {
+      responseData.message = 'Recorded successfully'
+    }
+
+    return res.status(200).json(responseData)
   } catch (error) {
-    console.error(JSON.stringify(error));
-    return res.status(500).json({ code: 500, message: 'Internal Server Error' });
+    console.error("ggg")
+
+    console.error(error)
+    return res.status(500).json({ code: 500, message: 'Internal Server Error' })
   }
-};
+}
 
 exports.getAllInvoices = async (req, res) => {
   try {
