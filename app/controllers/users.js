@@ -2913,26 +2913,26 @@ exports.getInvoiceUnpaid = async (req, res) => {
 
 exports.recordpayment = async (req, res) => {
   try {
-    const file = req.files?.fileToUpload || null
-    const invoice = await Invoice.findOne({ _id: req.params.id })
+    const frontImageFile = req.files?.frontImage || null;
+    const backImageFile = req.files?.backImage || null;
+    const invoice = await Invoice.findOne({ _id: req.params.id });
 
     if (!invoice) {
-      return res.status(404).send({ message: 'Invoice not found', code: 404 })
+      return res.status(404).send({ message: 'Invoice not found', code: 404 });
     }
 
-    let mediaPath = ''
+    let frontImagePath = invoice.frontImage || '';
+    let backImagePath = invoice.backImage || '';
 
-    if (file) {
-      console.log('Media file detected:', file)
+    if (frontImageFile) {
+      console.log('Front Image file detected:', frontImageFile);
 
-      const { name, mimetype, data } = file
-      const fileContent = Buffer.from(data, 'binary')
+      const { name, mimetype, data } = frontImageFile;
+      const fileContent = Buffer.from(data, 'binary');
 
-      const fileExtension = name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random()
-        .toString(36)
-        .substr(2, 9)}.${fileExtension}`
-      const fileKey = `images/${fileName}`
+      const fileExtension = name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExtension}`;
+      const fileKey = `images/${fileName}`;
 
       const putParams = {
         Bucket: 'eurobase-media',
@@ -2940,12 +2940,35 @@ exports.recordpayment = async (req, res) => {
         Body: fileContent,
         ACL: 'public-read',
         ContentType: mimetype
-      }
+      };
 
-      await s3.putObject(putParams).promise()
+      await s3.putObject(putParams).promise();
+      frontImagePath = `${process.env.CONTABO_END_POINT_IMAGE}/${putParams.Key}`;
+      console.log('Front Image uploaded successfully:', frontImagePath);
+    }
 
-      mediaPath = `${process.env.CONTABO_END_POINT}/${putParams.Bucket}/${putParams.Key}`
-      console.log('Media file uploaded successfully:', mediaPath)
+    if (backImageFile) {
+      console.log('Back Image file detected:', backImageFile);
+
+      const { name, mimetype, data } = backImageFile;
+      const fileContent = Buffer.from(data, 'binary');
+
+      const fileExtension = name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExtension}`;
+      const fileKey = `images/${fileName}`;
+
+      const putParams = {
+        Bucket: 'eurobase-media',
+        Key: fileKey,
+        Body: fileContent,
+        ACL: 'public-read',
+        ContentType: mimetype
+      };
+
+      await s3.putObject(putParams).promise();
+
+      backImagePath = `${process.env.CONTABO_END_POINT_IMAGE}/${putParams.Key}`;
+      console.log('Back Image uploaded successfully:', backImagePath);
     }
 
     if (invoice.status === 'unpaid') {
@@ -2954,7 +2977,7 @@ exports.recordpayment = async (req, res) => {
         req.body.payment_method === 'cheque' ||
         req.body.payment_method === 'virement'
       ) {
-        const newBalance = Number(invoice.total) - Number(req.body.paid_amount)
+        const newBalance = Number(invoice.total) - Number(req.body.paid_amount);
         const filter =
           Math.floor(req.body.paid_amount) === Math.floor(Number(invoice.total))
             ? {
@@ -2966,9 +2989,9 @@ exports.recordpayment = async (req, res) => {
                 status: 'partially_paid',
                 balance: newBalance,
                 paid_amount: req.body.paid_amount
-              }
+              };
 
-        await Invoice.findOneAndUpdate({ _id: req.params.id }, { $set: filter })
+        await Invoice.findOneAndUpdate({ _id: req.params.id }, { $set: filter });
       }
     } else if (invoice.status === 'partially_paid') {
       if (
@@ -2976,10 +2999,8 @@ exports.recordpayment = async (req, res) => {
         req.body.payment_method === 'cheque' ||
         req.body.payment_method === 'virement'
       ) {
-        const newBalance =
-          Number(invoice.balance) - Number(req.body.paid_amount)
-        const newPaidAmount =
-          Number(invoice.paid_amount) + Number(req.body.paid_amount)
+        const newBalance = Number(invoice.balance) - Number(req.body.paid_amount);
+        const newPaidAmount = Number(invoice.paid_amount) + Number(req.body.paid_amount);
         const filter =
           Math.floor(req.body.paid_amount) === Math.floor(Number(invoice.total))
             ? {
@@ -2991,49 +3012,61 @@ exports.recordpayment = async (req, res) => {
                 status: 'partially_paid',
                 balance: newBalance,
                 paid_amount: newPaidAmount
-              }
+              };
 
-        await Invoice.findOneAndUpdate({ _id: req.params.id }, filter)
+        await Invoice.findOneAndUpdate({ _id: req.params.id }, filter);
       }
     }
 
-    const updateFields = {}
+    const updateFields = {};
 
     if (req.body.comment) {
-      updateFields.comment = req.body.comment
+      updateFields.comment = req.body.comment;
     }
 
     if (req.body.recieved_from) {
-      updateFields.recieved_from = req.body.recieved_from
+      updateFields.recieved_from = req.body.recieved_from;
     }
 
     if (req.body.transaction_id) {
-      updateFields.transaction_id = req.body.transaction_id
+      updateFields.transaction_id = req.body.transaction_id;
     }
-    const update_invoice = await Invoice.findByIdAndUpdate(
-      req.params.id,
-      updateFields,
-      { new: true }
-    )
 
-    if (mediaPath === '') {
-      return res.status(200).json({
-        code: 200,
-        message: 'Recorded successfully',
-        data: update_invoice
-      })
-    } else {
-      return res.status(200).json({
-        code: 200,
-        message: 'Recorded successfully & image uploaded',
-        data: { payment: update_invoice, image: mediaPath }
-      })
+    if (frontImagePath) {
+      updateFields.frontImage = frontImagePath;
     }
+
+    if (backImagePath) {
+      updateFields.backImage = backImagePath;
+    }
+
+    const updatedInvoice = await Invoice.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateFields },
+      { new: true }
+    );
+
+    let responseData = {
+      code: 200,
+      message: 'Recorded successfully',
+      data: updatedInvoice
+    };
+
+    if (frontImagePath && backImagePath) {
+      responseData.message = 'Recorded successfully & images uploaded';
+    } else if (frontImagePath || backImagePath) {
+      responseData.message = 'Recorded successfully & image uploaded';
+    } else {
+      responseData.message = 'Recorded successfully';
+    }
+
+    return res.status(200).json(responseData);
   } catch (error) {
-    console.error(JSON.stringify(error))
-    return res.status(500).json({ code: 500, message: 'Internal Server Error' })
+    console.error(JSON.stringify(error));
+    return res.status(500).json({ code: 500, message: 'Internal Server Error' });
   }
-}
+};
+
 exports.getAllInvoices = async (req, res) => {
   try {
     const search = (req.query.search || '').toLowerCase()

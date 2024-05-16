@@ -1,59 +1,66 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
 const InvoiceSchema = new mongoose.Schema(
   {
     clientId: {
       type: mongoose.ObjectId,
-      ref: "Client",
+      ref: 'Client'
     },
     user_id: {
       type: mongoose.ObjectId,
-      ref: "User",
+      ref: 'User'
     },
     invoiceNumber: {
-      type: String,
+      type: String
     },
     regNumber: {
-      type: String,
+      type: String
     },
     draft: {
       type: Boolean,
-      default: false,
+      default: false
     },
     sendDate: {
-      type: Date,
+      type: Date
     },
     reminderDate: {
-      type: Date,
+      type: Date
     },
     createdDate: {
-      type: Date,
+      type: Date
     },
     technicianId: {
-      type: mongoose.ObjectId,
+      type: mongoose.ObjectId
     },
     parts: {
-      type: Array,
+      type: Array
     },
     total: {
-      type: String,
+      type: String
     },
     balance: {
-      type: Number,
+      type: Number
     },
     status: {
       type: String,
-      enum: ["unpaid", "partially_paid", "fully_paid"],
-      default: "unpaid",
+      enum: ['unpaid', 'partially_paid', 'fully_paid'],
+      default: 'unpaid'
     },
     quotation_id: {
       type: mongoose.ObjectId,
-      ref: "quotes",
+      ref: 'quotes'
     },
     free_quotation_id: {
       type: mongoose.ObjectId,
-      ref: "freeQuotes",
+      ref: 'freeQuotes'
     },
+    frontImage: {
+      type: String
+    },
+    backImage: {
+      type: String
+    },
+
     paid_amount: { type: Number, default: 0 },
     payment_amount: { type: String },
     transiction_id: { type: String },
@@ -61,12 +68,12 @@ const InvoiceSchema = new mongoose.Schema(
     recieved_from: { type: String },
     invoiceSent: { type: Boolean, default: false },
     comment: String,
-    currency: String,
+    currency: String
   },
   {
     versionKey: false,
-    timestamps: true,
+    timestamps: true
   }
-);
+)
 
-module.exports = mongoose.model("invoice", InvoiceSchema);
+module.exports = mongoose.model('invoice', InvoiceSchema)
