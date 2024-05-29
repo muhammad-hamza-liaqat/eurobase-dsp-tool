@@ -24,14 +24,14 @@ app.set('view engine', 'ejs');
 app.set('views', viewsDirectory);
 
 mailer.extend(app, {
-  from: 'mh408800@gmail.coom',
+  from: 'm.hamza1782@gmail.com',
   host: 'smtp.gmail.com', // hostname
   secureConnection: true, // use SSL
   port: 465, // port for secure SMTP
   transportMethod: 'SMTP', // default is SMTP. Accepts anything that nodemailer accepts
   auth: {
-    user: 'mh408800@gmail.com',
-    pass: 'lrrdprxdslcmhmqy'
+    user: 'm.hamza1782@gmail.com',
+    pass: ''
     // user: "nodeteamemail@gmail.com",
     // pass: "ukgyoobypzpiuuvb",
     // user: "testing.team0012@gmail.com",
@@ -44,27 +44,55 @@ mailer.extend(app, {
  * @param {Object} data - data
  * @param {boolean} callback - callback
  */
+//  const sendEmail = async (data, callback) => {
+//   const auth = {
+//     auth: {
+//       api_key: process.env.EMAIL_SMTP_API_MAILGUN,
+//       domain: process.env.EMAIL_SMTP_DOMAIN_MAILGUN
+//     }
+//   }
+//   const transporter = nodemailer.createTransport(mg(auth))
+//   const mailOptions = {
+//     from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM_ADDRESS}>`,
+//     to: `${data.user.name} <${data.user.email}>`,
+//     subject: data.subject,
+//     html: data.htmlMessage
+//   }
+//   transporter.sendMail(mailOptions, (err) => {
+//     if (err) {
+//       return callback(false)
+//     }
+//     return callback(true)
+//   })
+// }
+
 const sendEmail = async (data, callback) => {
   const auth = {
     auth: {
       api_key: process.env.EMAIL_SMTP_API_MAILGUN,
-      domain: process.env.EMAIL_SMTP_DOMAIN_MAILGUN
-    }
-  }
-  const transporter = nodemailer.createTransport(mg(auth))
+      domain: process.env.EMAIL_SMTP_DOMAIN_MAILGUN,
+    },
+  };
+
+  const transporter = nodemailer.createTransport(mg(auth));
+
   const mailOptions = {
     from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM_ADDRESS}>`,
     to: `${data.user.name} <${data.user.email}>`,
     subject: data.subject,
-    html: data.htmlMessage
-  }
+    html: data.htmlMessage,
+  };
+
   transporter.sendMail(mailOptions, (err) => {
     if (err) {
-      return callback(false)
+      console.error('Error sending email:', err);
+      return callback(false);
     }
-    return callback(true)
-  })
-}
+    return callback(true);
+  });
+};
+
+
 module.exports = { sendEmail }
 /**
  * Prepares to send email
@@ -555,5 +583,6 @@ module.exports = {
   sendEmailInvoice,
   sendPasswordToSubUser,
   sendVerificationEmailforapp,
-  sendOtpToUser
+  sendOtpToUser, 
+  sendEmail
 }

@@ -45,7 +45,7 @@ var fs = require('fs')
 var moment = require('moment')
 var path = require('path')
 var mime = require('mime-types')
-var uuid = require('uuid')
+const { v4: uuidv4 } = require('uuid');
 const emailer = require('../middleware/emailer')
 const {
   sendAdminPushNotification,
@@ -128,6 +128,12 @@ const VoiceResponse = require('twilio').twiml.VoiceResponse
 
 const client = require('twilio')(twilioAccountSid, twilioAuthToken)
 
+// brevo email
+const SibApiV3Sdk = require('sib-api-v3-sdk');
+const apiKey = SibApiV3Sdk.ApiClient.instance.authentications['api-key'];
+apiKey.apiKey = process.env.BREVO_API_KEY;
+const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
 const updatePassword = async (password, user) => {
   return new Promise((resolve, reject) => {
     user.password = password
@@ -202,6 +208,10 @@ exports._sendNotification = async (data) => {
         title = data.title
         description = data.description
         notification_type = data.notification_type
+      } else if (data.type === 'receive_payment') {
+        title = data.title
+        description = data.description
+        notification_type = data.type
       } else {
         title = data.title
         description = data.description
@@ -212,6 +222,7 @@ exports._sendNotification = async (data) => {
       if (notification_type) {
         notificationObj.notification_type = notification_type
       }
+
       try {
         if (data.create) {
           // delete data.create;
@@ -594,19 +605,110 @@ exports.getCities = async (req, res) => {
   }
 }
 
+// exports.createSubUser = async (req, res) => {
+//   try {
+//     const data = req.body
+//     console.log('{incoming req.body of createSubUser}-->', data)
+
+//     const user = await User.findOne({ email: data.email })
+//     const subuser = await Sub_user.findOne({ email: data.email })
+//     if (user || subuser) {
+//       return res
+//         .status(200)
+//         .send({ status: false, code: 409, message: 'email already in use' })
+//     }
+//     if (req.body.user_type === 'expert') {
+//       req.body.View_A_Quote = true
+//     } else if (req.body.user_type === 'super_user') {
+//       req.body.View_A_Quote = true
+//       req.body.quote = true
+//       req.body.Access_To_Invoice = true
+//       req.body.create_customers = true
+//       req.body.Access_the_calendar = true
+//       req.body.Access_The_profile = true
+//       req.body.Access_The_FreeQuote = true
+//       req.body.Access_The_CarList = true
+//       req.body.Access_The_UserAuthorization = true
+//       req.body.create_customers = true
+//     } else if (req.body.user_type === 'body') {
+//       req.body.View_A_Quote = true
+//       req.body.quote = true
+//       req.body.Access_To_Invoice = true
+//       req.body.create_customers = true
+//       req.body.Access_the_calendar = true
+//       req.body.Access_The_profile = true
+//       req.body.Access_The_FreeQuote = true
+//       req.body.Access_The_CarList = true
+//       req.body.Access_The_UserAuthorization = true
+//     } else if (req.body.user_type === 'body_work_subcontractor') {
+//       req.body.View_A_Quote = true
+//       req.body.quote = true
+//       req.body.Access_To_Invoice = true
+//       req.body.create_customers = true
+//       req.body.Access_the_calendar = true
+//       req.body.Access_The_profile = true
+//       req.body.Access_The_FreeQuote = true
+//       req.body.Access_The_CarList = true
+//       req.body.Access_The_UserAuthorization = true
+//     }
+//     data.user_id = req.user._id
+//     const generate_password = await generatePassword(10)
+//     console.log(generate_password)
+//     data.password = generate_password
+//     const response = await Sub_user.create(data)
+//     console.log('created response', response)
+//     await emailer.sendPasswordToSubUser(
+//       req.getLocale(),
+//       {
+//         to: data.email,
+//         name: `${data.first_name} ${data.last_name}`,
+//         userHasAccessToQuote: data?.quote,
+//         userHasAccessToCalendar: data?.access_the_calendar,
+//         userHasAccessToWorkshopSchedule: data?.access_the_workshop_schedule,
+//         userHasAccessToChangePrices: data?.change_prices,
+//         userHasAccessToInvoices: data?.make_invoices,
+//         userHasAccessToCreateCustomers: data?.create_customers,
+//         userHasAccessToCreateRepairOrder: data?.create_repair_order,
+//         password: generate_password,
+//         subject: 'Eurobose Invitation',
+//         email: data.email,
+//         logo: process.env.LOGO,
+//         link: process.env.App_Url
+//       },
+//       'sendPasswordToSubUser'
+//     )
+//     const garrage = await User.findById(req.user._id)
+//     let newEmployees = garrage?.totalEmployees + 1
+//     await User.findByIdAndUpdate(req.user._id, {
+//       totalEmployees: newEmployees
+//     })
+//     res.status(200).json({ code: 200, user: response })
+//   } catch (error) {
+//     return res
+//       .status(500)
+//       .json({ code: 500, message: 'internal error', error: error.message })
+//   }
+// }
+
+// new code with brevo email service
+
+
+
+
+
 exports.createSubUser = async (req, res) => {
   try {
-    const data = req.body
+    const data = req.body;
+    console.log("{incoming data from `/users/create/sub/user`} ", req.body);
 
-    const user = await User.findOne({ email: data.email })
-    const subuser = await Sub_user.findOne({ email: data.email })
+    const user = await User.findOne({ email: data.email });
+    const subuser = await Sub_user.findOne({ email: data.email });
     if (user || subuser) {
-      return res
-        .status(200)
-        .send({ status: false, code: 409, message: 'email already in use' })
+      return res.status(409).send({ status: false, code: 409, message: 'email already in use' });
     }
+
     if (req.body.user_type === 'expert') {
-      req.body.View_A_Quote = true
+      req.body.View_A_Quote = true;
     } else if (req.body.user_type === 'super_user') {
       req.body.View_A_Quote = true
       req.body.quote = true
@@ -618,7 +720,7 @@ exports.createSubUser = async (req, res) => {
       req.body.Access_The_CarList = true
       req.body.Access_The_UserAuthorization = true
       req.body.create_customers = true
-    } else if (req.body.user_type === 'body') {
+    } else if (req.body.user_type === "body") {
       req.body.View_A_Quote = true
       req.body.quote = true
       req.body.Access_To_Invoice = true
@@ -628,7 +730,7 @@ exports.createSubUser = async (req, res) => {
       req.body.Access_The_FreeQuote = true
       req.body.Access_The_CarList = true
       req.body.Access_The_UserAuthorization = true
-    } else if (req.body.user_type === 'body_work_subcontractor') {
+    } else if (req.body.user_type === "body_work_subcontractor") {
       req.body.View_A_Quote = true
       req.body.quote = true
       req.body.Access_To_Invoice = true
@@ -639,43 +741,92 @@ exports.createSubUser = async (req, res) => {
       req.body.Access_The_CarList = true
       req.body.Access_The_UserAuthorization = true
     }
-    data.user_id = req.user._id
-    const generate_password = await generatePassword(10)
-    console.log(generate_password)
-    data.password = generate_password
-    const response = await Sub_user.create(data)
-    await emailer.sendPasswordToSubUser(
-      req.getLocale(),
-      {
-        to: data.email,
-        name: `${data.first_name} ${data.last_name}`,
-        userHasAccessToQuote: data?.quote,
-        userHasAccessToCalendar: data?.access_the_calendar,
-        userHasAccessToWorkshopSchedule: data?.access_the_workshop_schedule,
-        userHasAccessToChangePrices: data?.change_prices,
-        userHasAccessToInvoices: data?.make_invoices,
-        userHasAccessToCreateCustomers: data?.create_customers,
-        userHasAccessToCreateRepairOrder: data?.create_repair_order,
-        password: generate_password,
-        subject: 'Eurobose Invitation',
-        email: data.email,
-        logo: process.env.LOGO,
-        link: process.env.App_Url
-      },
-      'sendPasswordToSubUser'
-    )
-    const garrage = await User.findById(req.user._id)
-    let newEmployees = garrage?.totalEmployees + 1
-    await User.findByIdAndUpdate(req.user._id, {
-      totalEmployees: newEmployees
-    })
-    res.status(200).json({ code: 200, user: response })
+
+
+    data.user_id = req.user._id;
+    const generate_password = await generatePassword(10);
+    console.log(generate_password, "hashed Password generated!");
+    data.password = generate_password;
+
+    let token = uuidv4();
+    let startTime = Date.now();
+    // let expiryTime = new Date(startTime + 48 * 60 * 60 * 1000); // expiry time 48 hrs from now.
+    let expiryTime = new Date(startTime + 1 * 60* 1000); // testing
+
+    data.startTime = startTime;
+    data.token = token;
+    data.expiryTime = expiryTime;
+
+    const response = await Sub_user.create(data);
+    console.log('sub user created successfully!!!', response);
+
+    const templateData = {
+      ...data,
+      name: `${data.first_name} ${data.last_name}`,
+      userHasAccessToQuote: data?.quote,
+      userHasAccessToCalendar: data?.access_the_calendar,
+      userHasAccessToWorkshopSchedule: data?.access_the_workshop_schedule,
+      userHasAccessToChangePrices: data?.change_prices,
+      userHasAccessToInvoices: data?.make_invoices,
+      userHasAccessToCreateCustomers: data?.create_customers,
+      userHasAccessToCreateRepairOrder: data?.create_repair_order,
+      password: generate_password,
+      subject: 'Eurobose Invitation',
+      email: data.email,
+      link: `${process.env.SUB_USER_VERIFICATION_LINK}/${response._id}/${token}`
+    };
+    let customHtmlTemplate = await ejs.renderFile(path.join(__dirname, "../../views/en/SendPasswordToSubUser.ejs"), templateData);
+
+    const emailData = {
+      to: [{ email: data.email, name: `${data.first_name} ${data.last_name}` }],
+      sender: { email: process.env.BREVO_EMAIL, name: process.env.BREVO_USER_NAME },
+      subject: 'Eurobose Invitation',
+      htmlContent: customHtmlTemplate
+    };
+    await apiInstance.sendTransacEmail(emailData);
+
+    const garage = await User.findById(req.user._id);
+    let newEmployees = garage?.totalEmployees + 1;
+    await User.findByIdAndUpdate(req.user._id, { totalEmployees: newEmployees });
+
+    return res.status(200).json({ code: 200, user: response });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ code: 500, message: 'internal error', error: error.message })
+    console.log("an error occured:", error);
+    return res.status(500).json({ code: 500, message: 'internal error', error: error.message });
   }
+};
+
+
+exports.verifySubUser = async (req, res) => {
+  try {
+    const userID = req.params.id;
+    const token = req.params.token
+    const validUser = await Sub_user.findById(userID)
+    console.log("user", validUser);
+    if (!validUser) {
+      return res.status(400).json({ message: "user not found." })
+    }
+    const tokenFromDB = validUser.token;
+    console.log("tokenFromDB", tokenFromDB);
+    if (tokenFromDB !== token) {
+      return res.status(409).json({ message: "Token does not matches" })
+    }
+    if (Date.now() > validUser.expiryTime.getTime()) {
+      return res.status(409).json({ message: "acceptance time out!" })
+    }
+    validUser.accountStatus = "active";
+    validUser.token = null
+    validUser.startTime = null
+    validUser.expiryTime = null
+    await validUser.save();
+    return res.status(200).json({ message: "verification completed succesfully!" })
+  } catch (error) {
+    console.log("error", error);
+    return res.status(500).json({ message: "internal server error", error: error })
+  }
+
 }
+
 
 exports.editSubUser = async (req, res) => {
   try {
@@ -1055,6 +1206,7 @@ exports.downloadCsv = async (req, res) => {
 exports.invoice = async (req, res) => {
   try {
     const data = req.body
+    console.log('{incoming req.body}', req.body)
     req.body.user_id = req.user._id
     let response = await db.invoice(Invoice, req.body)
     if (req.body.type == 'create') {
@@ -1098,8 +1250,10 @@ exports.freeinvoice = async (req, res) => {
 
 exports.quote = async (req, res) => {
   try {
+    // console.log("incoming req.body ------> ", req.body);
     req.body.user_id = req.user._id
     let response = await db.quote(Quote, req.body)
+    // console.log("response quote", response);
     return res.status(200).json({ code: 200, response })
   } catch (error) {
     handleError(res, error)
@@ -1962,19 +2116,19 @@ exports.dashboardgraphapi = async (req, res) => {
             )
             return foundItem
               ? {
-                  _id: {
-                    year: foundItem._id.year,
-                    month: foundItem._id.month
-                  },
-                  total_price: foundItem.total_price
-                }
+                _id: {
+                  year: foundItem._id.year,
+                  month: foundItem._id.month
+                },
+                total_price: foundItem.total_price
+              }
               : {
-                  _id: {
-                    year: moment().year(),
-                    month: index + 1
-                  },
-                  total_price: 0
-                }
+                _id: {
+                  year: moment().year(),
+                  month: index + 1
+                },
+                total_price: 0
+              }
           })
           .filter((item) => item.total_price !== undefined) // Remove undefined items
       }
@@ -2904,34 +3058,30 @@ exports.getInvoiceUnpaid = async (req, res) => {
 // }
 
 exports.recordpayment = async (req, res) => {
-  console.log("incoming req", req.body);
+  let admin = await Admin.find()
   try {
     const invoice = await Invoice.findOne({ _id: req.params.id })
-
     if (!invoice) {
-      return res.status(404).send({ message: 'invoice not found', code: 404 })
+      return res.status(404).send({ message: 'Invoice not found', code: 404 })
     }
-
     let mediaPaths = []
-    console.log(req.files)
     if (req.files && req.files.media) {
       console.log('Media files detected:', req.files.media)
-
       const media = Array.isArray(req.files.media)
         ? req.files.media
         : [req.files.media]
-
-      if (media.length > 2){
-        return res.status(400).json({code: 400, message: "only 2 media file(s) are allowed!"})
+      if (media.length > 2) {
+        return res
+          .status(400)
+          .json({ code: 400, message: 'Only 2 media file(s) are allowed!' })
       }
-      // path to save the images 
+      // Path to save the images
       const uploadPath = path.join(__dirname, '..', '..', 'public', 'uploads')
-      // will create the public/uploads folder if it doesn't exist!
+      // Create the public/uploads folder if it doesn't exist
       if (!fs.existsSync(uploadPath)) {
         fs.mkdirSync(uploadPath, { recursive: true })
       }
       console.log('Upload path:', uploadPath)
-
       for (let i = 0; i < media.length; i++) {
         const mediaPath = path.join(uploadPath, media[i].name)
         try {
@@ -2942,90 +3092,91 @@ exports.recordpayment = async (req, res) => {
           console.error('Error moving media file:', moveError)
         }
       }
-
       console.log('Media paths:', mediaPaths)
     }
 
+    let invoiceUpdate
     if (invoice.status === 'unpaid') {
-      if (
-        req.body.payment_method === 'cash' ||
-        req.body.payment_method === 'cheque' ||
-        req.body.payment_method === 'virement'
-      ) {
+      if (['cash', 'cheque', 'virement'].includes(req.body.payment_method)) {
         const newBalance = Number(invoice.total) - Number(req.body.paid_amount)
-        const filter =
+        invoiceUpdate =
           Math.floor(req.body.paid_amount) === Math.floor(Number(invoice.total))
             ? {
-                status: 'fully_paid',
-                balance: 0,
-                paid_amount: req.body.paid_amount
-              }
+              status: 'fully_paid',
+              balance: 0,
+              paid_amount: req.body.paid_amount
+            }
             : {
-                status: 'partially_paid',
-                balance: newBalance,
-                paid_amount: req.body.paid_amount
-              }
-
-        await Invoice.findOneAndUpdate({ _id: req.params.id }, { $set: filter })
+              status: 'partially_paid',
+              balance: newBalance,
+              paid_amount: req.body.paid_amount
+            }
+        await Invoice.findOneAndUpdate(
+          { _id: req.params.id },
+          { $set: invoiceUpdate }
+        )
       }
     } else if (invoice.status === 'partially_paid') {
-      if (
-        req.body.payment_method === 'cash' ||
-        req.body.payment_method === 'cheque' ||
-        req.body.payment_method === 'virement'
-      ) {
+      if (['cash', 'cheque', 'virement'].includes(req.body.payment_method)) {
         const newBalance =
           Number(invoice.balance) - Number(req.body.paid_amount)
         const newPaidAmount =
           Number(invoice.paid_amount) + Number(req.body.paid_amount)
-        const filter =
-          Math.floor(req.body.paid_amount) === Math.floor(Number(invoice.total))
-            ? {
-                status: 'fully_paid',
-                balance: 0,
-                paid_amount: newPaidAmount
-              }
+        invoiceUpdate =
+          Math.floor(newPaidAmount) === Math.floor(Number(invoice.total))
+            ? { status: 'fully_paid', balance: 0, paid_amount: newPaidAmount }
             : {
-                status: 'partially_paid',
-                balance: newBalance,
-                paid_amount: newPaidAmount
-              }
-
-        await Invoice.findOneAndUpdate({ _id: req.params.id }, filter)
+              status: 'partially_paid',
+              balance: newBalance,
+              paid_amount: newPaidAmount
+            }
+        await Invoice.findOneAndUpdate(
+          { _id: req.params.id },
+          { $set: invoiceUpdate }
+        )
       }
     }
 
     const updateFields = {}
-
     if (req.body.comment) {
       updateFields.comment = req.body.comment
     }
-
     if (req.body.received_from) {
       updateFields.received_from = req.body.received_from
     }
-
     if (req.body.transaction_id) {
       updateFields.transaction_id = req.body.transaction_id
     }
-
-    const update_invoice = await Invoice.findByIdAndUpdate(
+    const updatedInvoice = await Invoice.findByIdAndUpdate(
       req.params.id,
       updateFields,
       { new: true }
     )
 
+    const notificationObj = {
+      sender_id: admin[0]._id,
+      receiver_id: req.body.userID,
+      type: 'receive_payment',
+      create: true,
+      create_admin: true,
+      title: 'Payment received',
+      typeId: req.params.id,
+      description: `Payment of ${req.body.paid_amount} has been recorded for invoice ${req.params.id}.`
+    }
+    console.log('notificationObj-------------------------->', notificationObj)
+    await this._sendNotification(notificationObj)
+
     if (mediaPaths.length === 0) {
       return res.status(200).json({
         code: 200,
         message: 'Recorded successfully',
-        data: update_invoice
+        data: updatedInvoice
       })
     } else {
       return res.status(200).json({
         code: 200,
         message: 'Recorded successfully & images uploaded',
-        data: { payment: update_invoice, images: mediaPaths }
+        data: { payment: updatedInvoice, images: mediaPaths }
       })
     }
   } catch (error) {
@@ -4431,36 +4582,213 @@ exports.sendRemainder = async (req, res) => {
   }
 }
 
-exports.sendReminderEmail = async (req, res) => {
-  try {
-    req.body.user_id = req.user._id
-    const client = await Client.findById(req.body.client_id)
-    console.log('client', client)
-    const data = await EmailModel.create(req.body)
-    console.log('email data', data)
+// exports.sendReminderEmail = async (req, res) => {
+//   try {
+//     req.body.user_id = req.user._id
+//     const client = await Client.findById(req.body.client_id)
+//     console.log('client', client.email)
+//     const data = await EmailModel.create(req.body)
+//     // console.log('email data', data)
 
-    await await emailer.sendPasswordToSubUser(
-      req.getLocale(),
-      {
-        to: client.email,
-        name: `${client.firstName} ${client.lastName}`,
-        subject: 'Reminding about Payment of eurobose',
+//     await await emailer.sendPasswordToSubUser(
+//       req.getLocale(),
+//       {
+//         to: client.email,
+//         name: `${client.firstName} ${client.lastName}`,
+//         subject: 'Reminding about Payment of eurobose',
+//         message: req.body.message,
+//         logo: process.env.LOGO,
+//         appname: process.env.APP_NAME
+//       },
+//       'sendEmailFollow'
+//     )
+//     return res.status(200).json({
+//       code: 200,
+//       data: data
+//     })
+//   } catch (error) {
+//     return res
+//       .status(500)
+//       .send({ code: 500, message: 'internal server error', error })
+//   }
+// }
+
+// exports.sendReminderEmail = async (req, res) => {
+
+//   console.log('incoming req. body', req.body)
+//   try {
+//     // req.body.user_id = req.user._id;
+//     // const client = await Client.findById(req.body.client_id);
+//     // if (!client) {
+//     //   return res.status(400).json({ code: 400, message: 'Client not found' });
+//     // }
+//     // console.log('client', client);
+
+//     const recipientEmail = req.body.sendTo
+//     if (!recipientEmail) {
+//       return res
+//         .status(400)
+//         .json({ code: 400, message: 'Recipient email not provided' })
+//     }
+
+//     const emailData = {
+//       to: recipientEmail,
+//       name: `${client.firstName} ${client.lastName}`,
+//       subject: req.body.subject,
+//       message: req.body.message,
+//       logo: process.env.LOGO,
+//       appname: process.env.APP_NAME
+//     }
+
+//     console.log('sending email to ===>', emailData.to)
+
+//     await emailer.sendPasswordToSubUser(
+//       req.getLocale(),
+//       emailData,
+//       'sendEmailFollow'
+//     )
+
+//     const data = await EmailModel.create(req.body)
+//     console.log('email data', data)
+
+//     return res.status(200).json({
+//       code: 200,
+//       data: data
+//     })
+//   } catch (error) {
+//     console.error('Error sending reminder email:', error)
+//     return res
+//       .status(500)
+//       .json({ code: 500, message: 'Internal server error', error })
+//   }
+// }
+
+// new code with brevo
+
+// exports.sendReminderEmail = async (req, res) => {
+//   console.log('incoming req. body', req.body);
+//   try {
+
+//     const recipientEmail = req.body.sendTo;
+//     if (!recipientEmail) {
+//       return res
+//         .status(400)
+//         .json({ code: 400, message: 'Recipient email not provided' });
+//     }
+
+//     const client = {
+//       firstName: 'ClientFirstName', 
+//       lastName: 'ClientLastName' 
+//     };
+//     const templateData = {
+//       clientFirstName: client.firstName,
+//       clientLastName: client.lastName,
+//       subject: req.body.subject,
+//       message: req.body.message,
+//       appName: process.env.APP_NAME
+//     }
+//     // template rendering
+//     let customHtmlTemplate = await ejs.renderFile(path.join(__dirname, "../../views/en/sendEmailFollow.ejs"), templateData)
+
+//     const emailData = {
+//       to: [{ email: recipientEmail, name: `${client.firstName} ${client.lastName}` }],
+//       sender: { email: process.env.BREVO_EMAIL, name: process.env.BREVO_USER_NAME }, 
+//       subject: req.body.subject,
+//       htmlContent: customHtmlTemplate
+//     };
+
+//     console.log('sending email to ===>', emailData.to[0].email);
+
+//     await apiInstance.sendTransacEmail(emailData);
+
+//     const data = await EmailModel.create(req.body);
+//     console.log('email data', data);
+
+//     return res.status(200).json({
+//       code: 200,
+//       data: data
+//     });
+//   } catch (error) {
+//     console.error('Error sending reminder email:', error);
+//     return res
+//       .status(500)
+//       .json({ code: 500, message: 'Internal server error', error });
+//   }
+// };
+
+
+
+// sending email to multiple users in an array -> new requirement
+
+exports.sendReminderEmail = async (req, res) => {
+  console.log('incoming req. body', req.body);
+  try {
+    const recipients = req.body.sendTo.map(recipient => recipient.email);
+
+    if (!recipients || recipients.length === 0) {
+      return res
+        .status(400)
+        .json({ code: 400, message: 'Recipient emails not provided' });
+    }
+
+    const client = {
+      firstName: 'ClientFirstName',
+      lastName: 'ClientLastName'
+    };
+    const templateData = {
+      clientFirstName: client.firstName,
+      clientLastName: client.lastName,
+      subject: req.body.subject,
+      message: req.body.message,
+      appName: process.env.APP_NAME
+    }
+    // template rendering
+    let customHtmlTemplate = await ejs.renderFile(path.join(__dirname, "../../views/en/sendEmailFollow.ejs"), templateData)
+
+    const emailPromises = recipients.map(async (recipientEmail) => {
+      const emailData = {
+        to: [{ email: recipientEmail, name: `${client.firstName} ${client.lastName}` }],
+        sender: { email: process.env.BREVO_EMAIL, name: process.env.BREVO_USER_NAME },
+        subject: req.body.subject,
+        htmlContent: customHtmlTemplate
+      };
+
+      console.log('Sending email to:', recipientEmail);
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(recipientEmail)) {
+        throw new Error('Invalid recipient email format');
+      }
+
+      await apiInstance.sendTransacEmail(emailData);
+
+      const emailRecord = {
         message: req.body.message,
-        logo: process.env.LOGO,
-        appname: process.env.APP_NAME
-      },
-      'sendEmailFollow'
-    )
+        client_id: req.body.clientId,
+        recipients: [recipientEmail],
+        status: true
+      };
+
+      return EmailModel.create(emailRecord);
+    });
+
+    const emailResponses = await Promise.all(emailPromises);
+
+    console.log('Email data:', emailResponses);
+
     return res.status(200).json({
       code: 200,
-      data: data
-    })
+      data: emailResponses
+    });
   } catch (error) {
+    console.error('Error sending reminder email:', error);
     return res
       .status(500)
-      .send({ code: 500, message: 'internal server error', error })
+      .json({ code: 500, message: 'Internal server error', error: error.message });
   }
-}
+};
+
+
 exports.getAllFollowUpEmails = async (req, res) => {
   try {
     const search = req.query?.search?.toLowerCase().trim()

@@ -60,19 +60,19 @@ const SubUserSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
-    Access_The_CarList:{
+    Access_The_CarList: {
       type: Boolean,
       default: false
     },
-    Access_The_UserAuthorization:{
+    Access_The_UserAuthorization: {
       type: Boolean,
       default: false
     },
-    change_price:{
+    change_price: {
       type: Boolean,
       default: false
     },
-    create_repair_order:{
+    create_repair_order: {
       type: Boolean,
       default: false
     },
@@ -107,6 +107,27 @@ const SubUserSchema = new mongoose.Schema(
     },
     initials: {
       type: String
+    },
+    token: {
+      type: String,
+      required: false,
+      default: null
+    },
+    startTime: {
+      type: Date,
+      required: false,
+      default: null
+    },
+    expiryTime: {
+      type: Date,
+      required: false,
+      default: null
+    },
+    accountStatus:{
+      type: String,
+      required: false,
+      default: "pending",
+      enum: ["pending", "active", "locked"]
     }
   },
   {

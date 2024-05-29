@@ -39,7 +39,8 @@ const NotificationSchema = new mongoose.Schema(
         "Permission Request",
         "contact",
         "car",
-        "Subscription Plan"
+        "Subscription Plan",
+        "receive_payment"
       ],
       required: true,
     },

@@ -54,6 +54,9 @@ const InvoiceSchema = new mongoose.Schema(
       type: mongoose.ObjectId,
       ref: "freeQuotes",
     },
+    licenseNumber:{
+      type: String
+    }, 
     paid_amount: { type: Number, default: 0 },
     payment_amount: { type: String },
     transiction_id: { type: String },

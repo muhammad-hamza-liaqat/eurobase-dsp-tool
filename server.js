@@ -19,7 +19,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 var fs = require("fs");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./swagger-a.json");
-
+const {updateExpiredAccounts} = require("./app/cronJob");
 // var options = {
 //   key: fs.readFileSync(
 //     '/etc/letsencrypt/live/betazone1.promaticstechnologies.com/privkey.pem',

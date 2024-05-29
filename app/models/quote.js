@@ -43,6 +43,9 @@ const quoteSchema = new mongoose.Schema(
       type :Boolean,
       default:false
     },
+    licenseNumber :{
+      type: String,
+    },
     invoiceNumber:{
       type: String,
     },
