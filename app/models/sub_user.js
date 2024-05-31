@@ -78,8 +78,8 @@ const SubUserSchema = new mongoose.Schema(
     },
     is_active: {
       type: String,
-      enum: ['active', 'inactive'],
-      default: 'active'
+      enum: ['active', 'inactive', "locked", "pending"],
+      default: 'pending'
     },
     access_the_workshop_schedule: {
       type: Boolean,
@@ -113,22 +113,11 @@ const SubUserSchema = new mongoose.Schema(
       required: false,
       default: null
     },
-    startTime: {
-      type: Date,
-      required: false,
-      default: null
-    },
     expiryTime: {
       type: Date,
       required: false,
       default: null
     },
-    accountStatus:{
-      type: String,
-      required: false,
-      default: "pending",
-      enum: ["pending", "active", "locked"]
-    }
   },
   {
     versionKey: false,

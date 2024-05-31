@@ -600,4 +600,13 @@ router.get(
   authenticateUser(['user']),
   controller.getInvoiceDetails
 )
+
+// new
+
+router.post("/send-review/:id", authenticateUser(["user"]), controller.sendReview)
+router.post("/cancel-appointment/:id", authenticateUser(["user"]), controller.cancelAppointment)
+router.post("/send-quote-nofifications/:id", authenticateUser(["user"]), controller.sendQuoteNotifications)
+router.post("/send-maintenance-notifications/:id", authenticateUser(["user"]), controller.regularMaintenanceNotifications)
+
+
 module.exports = router

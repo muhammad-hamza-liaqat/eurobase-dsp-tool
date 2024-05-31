@@ -165,7 +165,7 @@ exports._sendNotification = async (data) => {
     if (senderDetails) {
       let description, title, notification_type
       let notificationObj = {
-        sender_id: null,
+        sender_id: data.sender_id || null,
         receiver_id: data.receiver_id,
         type: data.type,
         create: data?.create_admin,
@@ -212,7 +212,36 @@ exports._sendNotification = async (data) => {
         title = data.title
         description = data.description
         notification_type = data.type
-      } else {
+      } else if (data.type === "payment_out_of_date") {
+        title: data.title
+        description: data.description
+        notification_type = data.notification_type
+      } else if (data.type === "feedback_received") {
+        title = data.title
+        description = data.description
+        notification_type = data.notification_type
+      } else if (notification_type === "cancel_appointment") {
+        title = data.title
+        description: data.description
+        notification_type: data.notification_type
+      } else if (data.type === "quote_opened") {
+        title = data.title
+        description = data.description
+        notification_type = data.notification_type
+      } else if (data.type === "quote_accepted") {
+        title = data.title
+        description = data.description
+        notification_type = data.notification_type
+      } else if (data.type === "quote_expired") {
+        title = data.title
+        description = data.description
+        notification_type = data.notification_type
+      } else if (data.type === "maintenance_remainder"){
+        title = data.title
+        description = data.description
+        notification_type = data.notification_type
+      }
+      else {
         title = data.title
         description = data.description
       }
@@ -699,7 +728,6 @@ exports.getCities = async (req, res) => {
 exports.createSubUser = async (req, res) => {
   try {
     const data = req.body;
-    console.log("{incoming data from `/users/create/sub/user`} ", req.body);
 
     const user = await User.findOne({ email: data.email });
     const subuser = await Sub_user.findOne({ email: data.email });
@@ -751,7 +779,7 @@ exports.createSubUser = async (req, res) => {
     let token = uuidv4();
     let startTime = Date.now();
     // let expiryTime = new Date(startTime + 48 * 60 * 60 * 1000); // expiry time 48 hrs from now.
-    let expiryTime = new Date(startTime + 1 * 60* 1000); // testing
+    let expiryTime = new Date(startTime + 1 * 60 * 1000); // testing
 
     data.startTime = startTime;
     data.token = token;
@@ -803,25 +831,32 @@ exports.verifySubUser = async (req, res) => {
     const token = req.params.token
     const validUser = await Sub_user.findById(userID)
     console.log("user", validUser);
+
+    if (!userID || !token) {
+      return res.status(400).json({ message: "id and token are required both!" })
+    }
+
     if (!validUser) {
       return res.status(400).json({ message: "user not found." })
     }
     const tokenFromDB = validUser.token;
-    console.log("tokenFromDB", tokenFromDB);
-    if (tokenFromDB !== token) {
-      return res.status(409).json({ message: "Token does not matches" })
+    if (tokenFromDB !== token || tokenFromDB === null) {
+      return res.status(409).json({ message: "Token does not matches or is null" })
     }
+    // expiry checks
     if (Date.now() > validUser.expiryTime.getTime()) {
       return res.status(409).json({ message: "acceptance time out!" })
     }
     validUser.accountStatus = "active";
     validUser.token = null
-    validUser.startTime = null
     validUser.expiryTime = null
     await validUser.save();
     return res.status(200).json({ message: "verification completed succesfully!" })
   } catch (error) {
     console.log("error", error);
+    if (error.name === "CastError") {
+      return res.status(500).json({ message: "Invalid User ID Format" })
+    }
     return res.status(500).json({ message: "internal server error", error: error })
   }
 
@@ -2423,6 +2458,7 @@ exports.getClientsCars = async (req, res) => {
 }
 exports.getUpcomingAppointments = async (req, res) => {
   try {
+
     const today = new Date()
     today.setUTCHours(0, 0, 0, 0)
     const data = await Calendar.find({
@@ -2432,6 +2468,21 @@ exports.getUpcomingAppointments = async (req, res) => {
       path: 'client_id',
       select: '_id firstName lastName'
     })
+    const admin = await Admin.find();
+    for (let appointments of data) {
+      const notificationObj = {
+        sender_id: admin._id,
+        receiver_id: appointment.client_id._id,
+        type: "appointment_remainder",
+        create: true,
+        create_admin: true,
+        title: "Upcoming Appointment Remainder",
+        typeId: appointment._id,
+        description: `Dear ${appointment.client_id.firstName}, you have upcoming appointment on ${appointment.date.toLocaleDateString()}`
+
+      }
+      await _sendNotification(notificationObj);
+    }
 
     return res.status(200).json({
       code: 200,
@@ -3813,7 +3864,6 @@ exports.reschedule_appointment = async (req, res) => {
       { schedule_status: 'reschedule' },
       { new: true }
     )
-
     const { user_id, date, client_id } = updatedCalendar
     const client = await Client.findById(client_id)
     const formattedDate = new Date(date)
@@ -5622,3 +5672,337 @@ exports.getInvoiceDetails = async (req, res) => {
     return res.status(500).send({ code: 500, message: 'Internal server error' })
   }
 }
+
+
+exports.sendReview = async (req, res) => {
+  try {
+    let admin = await Admin.find();
+    const userId = req.params.id;
+
+    let user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "user not found!" })
+    }
+    if (!req.body.review) {
+      return res.status(400).json({ message: "review  is required!" })
+    }
+    const notificationObj = {
+      sender_id: req.params.id,
+      receiver_id: admin[0]._id,
+      type: "feedback_received",
+      create: true,
+      create_admin: true,
+      title: "customer added a new review",
+      typeId: req.params.id,
+      description: `a new review has been submitted against user: ${req.params.id}`,
+      notification_type: "feedback_received"
+    }
+    console.log("notification send successfully!", notificationObj)
+    await this._sendNotification(notificationObj);
+    return res.status(201).json({ message: "review submitted succesfully!" })
+  } catch (err) {
+    console.log("an error occured", err.message);
+    return res.status(500).json({ message: "internal server error", details: err.message })
+  }
+}
+
+exports.recordpayments = async (req, res) => {
+  let admin = await Admin.find()
+  try {
+    const invoice = await Invoice.findOne({ _id: req.params.id })
+    if (!invoice) {
+      return res.status(404).send({ message: 'Invoice not found', code: 404 })
+    }
+    const {user_id} = invoice;
+    let mediaPaths = []
+    if (req.files && req.files.media) {
+      console.log('Media files detected:', req.files.media)
+      const media = Array.isArray(req.files.media)
+        ? req.files.media
+        : [req.files.media]
+      if (media.length > 2) {
+        return res
+          .status(400)
+          .json({ code: 400, message: 'Only 2 media file(s) are allowed!' })
+      }
+      // Path to save the images
+      const uploadPath = path.join(__dirname, '..', '..', 'public', 'uploads')
+      // Create the public/uploads folder if it doesn't exist
+      if (!fs.existsSync(uploadPath)) {
+        fs.mkdirSync(uploadPath, { recursive: true })
+      }
+      console.log('Upload path:', uploadPath)
+      for (let i = 0; i < media.length; i++) {
+        const mediaPath = path.join(uploadPath, media[i].name)
+        try {
+          await media[i].mv(mediaPath)
+          console.log('Media file saved successfully:', mediaPath)
+          mediaPaths.push(mediaPath)
+        } catch (moveError) {
+          console.error('Error moving media file:', moveError)
+        }
+      }
+      console.log('Media paths:', mediaPaths)
+    }
+
+    let invoiceUpdate
+    if (invoice.status === 'unpaid') {
+      if (['cash', 'cheque', 'virement'].includes(req.body.payment_method)) {
+        const newBalance = Number(invoice.total) - Number(req.body.paid_amount)
+        invoiceUpdate =
+          Math.floor(req.body.paid_amount) === Math.floor(Number(invoice.total))
+            ? {
+              status: 'fully_paid',
+              balance: 0,
+              paid_amount: req.body.paid_amount
+            }
+            : {
+              status: 'partially_paid',
+              balance: newBalance,
+              paid_amount: req.body.paid_amount
+            }
+        await Invoice.findOneAndUpdate(
+          { _id: req.params.id },
+          { $set: invoiceUpdate }
+        )
+      }
+    } else if (invoice.status === 'partially_paid') {
+      if (['cash', 'cheque', 'virement'].includes(req.body.payment_method)) {
+        const newBalance =
+          Number(invoice.balance) - Number(req.body.paid_amount)
+        const newPaidAmount =
+          Number(invoice.paid_amount) + Number(req.body.paid_amount)
+        invoiceUpdate =
+          Math.floor(newPaidAmount) === Math.floor(Number(invoice.total))
+            ? { status: 'fully_paid', balance: 0, paid_amount: newPaidAmount }
+            : {
+              status: 'partially_paid',
+              balance: newBalance,
+              paid_amount: newPaidAmount
+            }
+        await Invoice.findOneAndUpdate(
+          { _id: req.params.id },
+          { $set: invoiceUpdate }
+        )
+      }
+    }
+
+    const updateFields = {}
+    if (req.body.comment) {
+      updateFields.comment = req.body.comment
+    }
+    if (req.body.received_from) {
+      updateFields.received_from = req.body.received_from
+    }
+    if (req.body.transaction_id) {
+      updateFields.transaction_id = req.body.transaction_id
+    }
+    const updatedInvoice = await Invoice.findByIdAndUpdate(
+      req.params.id,
+      updateFields,
+      { new: true }
+    )
+
+    const notificationObj = {
+      sender_id: admin[0]._id,
+      receiver_id: req.body.userID,
+      type: 'receive_payment',
+      create: true,
+      create_admin: true,
+      title: 'Payment received',
+      typeId: req.params.id,
+      description: `Payment of ${req.body.paid_amount} has been recorded for invoice ${req.params.id}.`
+    }
+    await this._sendNotification(notificationObj)
+
+    const adminNotificationObj = {
+      ...notificationObj,
+      receiver_id: admin[0]._id.toString(),
+      description: `Payment  ${req.body.paid_amount} has been received for invoice ${req.params.id} by user ${req.body.userID}.`
+    };
+    await this._sendNotification(adminNotificationObj);
+
+    console.log('User notification object:', notificationObj);
+    console.log('Admin notification object:', adminNotificationObj);
+
+    if (mediaPaths.length === 0) {
+      return res.status(200).json({
+        code: 200,
+        message: 'Recorded successfully',
+        data: updatedInvoice
+      })
+    } else {
+      return res.status(200).json({
+        code: 200,
+        message: 'Recorded successfully & images uploaded',
+        data: { payment: updatedInvoice, images: mediaPaths }
+      })
+    }
+  } catch (error) {
+    console.error(JSON.stringify(error))
+    return res.status(500).json({ code: 500, message: 'Internal Server Error' })
+  }
+}
+exports.cancelAppointment = async (req, res) => {
+  let admin = await Admin.find();
+  try {
+    const updatedCalendar = await Calendar.findByIdAndUpdate(
+      req.params.id,
+      { schedule_status: 'canceled' },
+      { new: true }
+    );
+    console.log("updatedCalendar before destructure", updatedCalendar)
+
+    const { user_id, date, client_id } = updatedCalendar;
+
+    const client = await Client.findById(client_id);
+
+    const formattedDate = new Date(date);
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    const dateFormatter = new Intl.DateTimeFormat('en-US', options);
+    const formattedDateString = dateFormatter.format(formattedDate);
+
+    const canceledNotificationObj = {
+      sender_id: admin[0]._id,
+      receiver_id: user_id.toString(),
+      type: 'cancel_appointment',
+      title: 'cancel_appointment',
+      create: true,
+      create_admin: true,
+      typeId: req.params.id,
+      description: `Your appointment  ${client.firstName} ${client.lastName} scheduled for ${formattedDateString} has been canceled.`,
+      notification_type: "cancel_appointment"
+    };
+    console.log("canceledNotificationObj", canceledNotificationObj)
+    await this._sendNotification(canceledNotificationObj);
+
+    return res.status(200).json({ code: 200, message: 'Appointment has been canceled' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+exports.sendQuoteNotifications = async (req, res) => {
+  const { type } = req.body;
+  const quoteId = req.params.id;
+
+  if (!quoteId) {
+    return res.status(400).json({ message: "No quoteId found" });
+  }
+
+  let quoteData, admin, client;
+
+  try {
+    quoteData = await Quote.findById(quoteId);
+    if (!quoteData) {
+      return res.status(404).json({ message: "Quote not found" });
+    }
+
+    admin = await Admin.find();
+
+
+    const { client_id } = quoteData;
+    client = await Client.findById(client_id);
+    if (!client) {
+      return res.status(404).json({ message: "Client not found" });
+    }
+  } catch (error) {
+    console.log("Error fetching data", error.message);
+    return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
+  }
+
+  try {
+    let notification = {
+      sender_id: quoteData.client_id,
+      receiver_id: admin[0]._id,
+      create: true,
+      create_admin: true,
+      typeId: quoteId
+    };
+
+    if (type === "quote_opened") {
+      notification = {
+        ...notification,
+        type: "quote_opened",
+        title: "The quote has been opened by the client",
+        description: `The quote with ${quoteData.regNumber} has been opened by the ${client.firstName}`,
+        notification_type: "quote_opened"
+      };
+      console.log("quote_open before saving", notification);
+    } else if (type === "quote_accepted") {
+      notification = {
+        ...notification,
+        type: "quote_accepted",
+        title: "Quote accepted",
+        description: `The quote with ${quoteData.regNumber} has been accepted by the ${client.firstName}`,
+        notification_type: "quote_accepted"
+      };
+      console.log("quoteAcceptedNotification before saving", notification);
+    } else if (type === "quote_expired") {
+      notification = {
+        ...notification,
+        type: "quote_expired",
+        title: "Quote expired",
+        description: `The quote with ${quoteData.regNumber} has expired`,
+        notification_type: "quote_expired"
+      };
+      console.log("quoteExpiredNotification before saving", notification);
+    } else {
+      console.log(`Invalid ${type} requested`);
+      return res.status(400).json({ message: "Invalid notification type requested!" });
+    }
+
+    await this._sendNotification(notification);
+    return res.status(200).json({ message: `${type} notification sent to the admin!` });
+  } catch (error) {
+    console.log("Error occurred", error.message);
+    return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
+  }
+};
+
+exports.regularMaintenanceNotifications = async (req, res) => {
+  try {
+    let admin = await Admin.find();
+
+    const client_id = req.params.id;
+    let response = await Quote.find({ client_id: client_id });
+
+    if (!response) {
+      return res.status(400).json({ message: "no client found!" });
+    }
+
+    const client = await Client.findById(client_id);
+    if (!client) {
+      return res.status(400).json({ message: "Client not found" });
+    }
+
+    let maintenanceNotificationObject = {
+      sender_id: admin[0]._id,
+      receiver_id: client_id,
+      type: "maintenance_remainder",
+      create: true,
+      create_admin: true,
+      title: "Maintenance Reminder",
+      typeId: req.params.id,
+      description: `Dear ${client.firstName} ${client.lastName}, this is a maintenance reminder for your vehicle ${response[0].model}`,
+      notification_type: "maintenance_remainder"
+    };
+
+    console.log("maintenanceNotificationObject before saving", maintenanceNotificationObject);
+
+    try {
+      await this._sendNotification(maintenanceNotificationObject);
+      return res.status(200).json({ message: "Maintenance reminder sent" });
+    } catch (error) {
+      console.log("Error sending notification", error.message);
+      return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
+    }
+  } catch (error) {
+    console.log("Error fetching data", error.message);
+    return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
+  }
+};
+
+// passing client_id, searching in quote if found, then process else throw an error
+

@@ -4,12 +4,12 @@ const updateExpiredAccounts = async () => {
     console.log("inside cron job function ----..................................................")
     try {
         const currentTime = new Date();
-        const expiredUsers = await Sub_user.find({ expiryTime: { $lt: currentTime }, token: { $ne: null }, accountStatus: "pending" });
+        const expiredUsers = await Sub_user.find({ expiryTime: { $lt: currentTime }, token: { $ne: null }, is_active: "pending" });
 
         for (const user of expiredUsers) {
             user.token = null;
             user.expiryTime = null;
-            user.accountStatus = "locked"
+            user.is_active = "locked"
             await user.save();
         }
 

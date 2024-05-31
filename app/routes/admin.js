@@ -430,8 +430,12 @@ router.post(
 router.post('/add-fcm-token', controller.add_fcm_token)
 router.post('/add-vat', authenticateUser(['superAdmin']), controller.addVat)
 router.get('/vat-list', authenticateUser(['superAdmin']), controller.getVatList);
-router.get("/single-vat/:id",authenticateUser(["superAdmin"]), controller.getSingleVat);
-router.delete("/delete-vat/:id",authenticateUser(["superAdmin"]), controller.deleteVatList);
-router.patch("/edit-vat/:id",authenticateUser(['superAdmin']), controller.editVat);
+router.get("/single-vat/:id", authenticateUser(["superAdmin"]), controller.getSingleVat);
+router.delete("/delete-vat/:id", authenticateUser(["superAdmin"]), controller.deleteVatList);
+router.patch("/edit-vat/:id", authenticateUser(['superAdmin']), controller.editVat);
+
+router.post("/send-remainder-appointments/:id",
+//  authenticateUser(["superAdmin"]),
+ controller.sendRemainderForAppointments)
 
 module.exports = router

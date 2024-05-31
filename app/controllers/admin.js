@@ -6,7 +6,7 @@ const {
   itemNotFound,
   // sendPushNotification,
 } = require("../middleware/utils");
-const { sendPushNotification } = require("../../config/firebase");
+// const { sendPushNotification } = require("../../config/firebase");
 const {
   createItem,
   createManyItems,
@@ -87,112 +87,261 @@ const Subscription = require("../models/subscription");
 const UserFeature = require("../models/user_feature");
 const emailer = require("../middleware/emailer");
 
-exports._sendNotification = async (data) => {
-  if (data.type) {
-    await User.findOne({
-      _id: data?.receiver_id,
-    })
-      .then(
-        async (senderDetail) => {
-          if (senderDetail) {
-            let title;
-            let notificationObj = {
-              sender_id: data.sender_id,
-              receiver_id: data.receiver_id,
-              type: data.type,
-              notification_type: data.notification_type,
-              description: data.description,
-              typeId: data.typeId,
-            };
-            if (data.type == "bookings") {
-              description = data.description;
-              title = data.title;
-            } else if (data.type === "create_account") {
-              title = "Account Created";
-            } else if (data.type == "approval") {
-              description = "Booking Genrated";
-              title = "Booking Generated";
-            } else if (data.type == "disapproved") {
-              title = "Booking Cancel";
-              description = `Booking Cancelled!`;
-            } else if (data.type == "create_booking") {
-              title = "Booking Cancel";
-              description = `Booking Cancelled!`;
-            } else if (data.type == "create_service") {
-              title = "Service Created";
-              description = `Service Created!`;
-            } else if (data.type == "cancelled") {
-              title = "Booking Cancel";
-              description = `Booking Cancelled!`;
-            } else if (data.type == "rejected") {
-              title = "Booking rejected";
-              description = `Booking Rejected!`;
-            } else if (data.type === "car") {
-              notificationObj.title = data.title;
-              notificationObj.objectName = data.objectName;
-            } else if (data.type === "Permission Request") {
-              notificationObj.title = data.title;
-            } else {
-              title = data.title;
-              description = data.description;
-            }
-            if (data.value_id) {
-              notificationObj.value_id = data.value_id;
-            }
-            try {
-              if (data.create_admin) {
-                notificationObj.is_admin = true;
-                notificationObj.notification_type = notificationObj.type;
-                console.log(notificationObj);
-                await createItem(notifications, notificationObj);
-              } else {
-                console.log(notificationObj);
-                await createItem(notifications, notificationObj);
-              }
-              if (data.create) {
-                // * create in db
-                delete data.create;
-              }
-            } catch (err) {
-              console.log("main err: ", err);
-            }
+// exports._sendNotification = async (data) => {
+//   if (data.type) {
+//     await User.findOne({
+//       _id: data?.receiver_id,
+//     })
+//       .then(
+//         async (senderDetail) => {
+//           if (senderDetail) {
+//             let title;
+//             let notificationObj = {
+//               sender_id: data.sender_id || null,
+//               receiver_id: data.receiver_id,
+//               type: data.type,
+//               notification_type: data.notification_type,
+//               description: data.description,
+//               typeId: data.typeId,
+//             };
+//             if (data.type == "bookings") {
+//               description = data.description;
+//               title = data.title;
+//             } else if (data.type === "create_account") {
+//               title = "Account Created";
+//             } else if (data.type == "approval") {
+//               description = "Booking Genrated";
+//               title = "Booking Generated";
+//             } else if (data.type == "disapproved") {
+//               title = "Booking Cancel";
+//               description = `Booking Cancelled!`;
+//             } else if (data.type == "create_booking") {
+//               title = "Booking Cancel";
+//               description = `Booking Cancelled!`;
+//             } else if (data.type == "create_service") {
+//               title = "Service Created";
+//               description = `Service Created!`;
+//             } else if (data.type == "cancelled") {
+//               title = "Booking Cancel";
+//               description = `Booking Cancelled!`;
+//             } else if (data.type == "rejected") {
+//               title = "Booking rejected";
+//               description = `Booking Rejected!`;
+//             } else if (data.type === "car") {
+//               notificationObj.title = data.title;
+//               notificationObj.objectName = data.objectName;
+//             } else if (data.type === "Permission Request") {
+//               notificationObj.title = data.title;
+//             } else if (data.type === "remainder_appointment"){
+//               title=data.title
+//               description= data.description
+//               notification_type= data.notification_type
+//             }
+//              else {
+//               title = data.title;
+//               description = data.description;
+//             }
+//             if (data.value_id) {
+//               notificationObj.value_id = data.value_id;
+//             }
+//             try {
+//               if (data.create_admin) {
+//                 notificationObj.is_admin = true;
+//                 notificationObj.notification_type = notificationObj.type;
+//                 console.log(notificationObj);
+//                 await createItem(notifications, notificationObj);
+//               } else {
+//                 console.log(notificationObj);
+//                 await createItem(notifications, notificationObj);
+//               }
+//               if (data.create) {
+//                 // * create in db
+//                 delete data.create;
+//               }
+//             } catch (err) {
+//               console.log("main err: ", err);
+//             }
 
-            const findUser = await User.findOne({
-              _id: data.receiver_id,
-            });
-            console.log(findUser);
-            const fcmTokens =
-              findUser?.fcmTokens.map((item) => item.token) || [];
-            console.log(fcmTokens);
-            if (fcmTokens.length > 0) {
-              try {
-                fcmTokens.map(
-                  async (item) =>
-                    await sendPushNotification(
-                      item,
-                      notificationObj.title,
-                      notificationObj.description
-                    )
-                );
-              } catch (e) {
-                console.log(e, "error");
-              }
-            }
+//             const findUser = await User.findOne({
+//               _id: data.receiver_id,
+//             });
+//             console.log(findUser);
+//             const fcmTokens =
+//               findUser?.fcmTokens.map((item) => item.token) || [];
+//             console.log(fcmTokens);
+//             if (fcmTokens.length > 0) {
+//               try {
+//                 fcmTokens.map(
+//                   async (item) =>
+//                     await sendPushNotification(
+//                       item,
+//                       notificationObj.title,
+//                       notificationObj.description
+//                     )
+//                 );
+//               } catch (e) {
+//                 console.log(e, "error");
+//               }
+//             }
+//           } else {
+//             throw buildErrObject(422, "sender detail is null");
+//           }
+//         },
+//         (error) => {
+//           throw buildErrObject(422, error);
+//         }
+//       )
+//       .catch((err) => {
+//         console.log("err: ", err);
+//       });
+//   } else {
+//     throw buildErrObject(422, "--* no type *--");
+//   }
+// };
+
+
+exports._sendNotification = async (data) => {
+  try {
+    let fcmTokens
+    let senderDetails = false
+    if (data.user) {
+      let user = await User.findById(data.receiver_id)
+      fcmTokens = user.fcmTokens
+      senderDetails = true
+    } else {
+      const admin = await Admin.find()
+      fcmTokens = admin[0].fcmTokens
+      senderDetails = true
+    }
+
+    if (senderDetails) {
+      let description, title, notification_type
+      let notificationObj = {
+        sender_id: data.sender_id || null,
+        receiver_id: data.receiver_id,
+        type: data.type,
+        create: data?.create_admin,
+        create_admin: data?.create_admin,
+        notification_type: data.notification_type,
+        typeId: data.typeId
+      }
+      if (data.type == 'bookings') {
+        description = data.description
+        title = data.title
+      } else if (data.type == 'approval') {
+        description = 'Booking Genrated'
+        title = 'Booking Generated'
+      } else if (data.type == 'create_account') {
+        title = data.title
+        description = data.body
+      } else if (data.type == 'disapproved') {
+        title = 'Booking Cancel'
+        description = `Booking Cancelled!`
+      } else if (data.type == 'create_booking') {
+        title = 'Booking Cancel'
+        description = `Booking Cancelled!`
+      } else if (data.type == 'create_service') {
+        title = 'Service Created'
+        description = `Service Created!`
+      } else if (data.type == 'cancelled') {
+        title = 'Booking Cancel'
+        description = `Booking Cancelled!`
+      } else if (data.type == 'rejected') {
+        title = 'Booking rejected'
+        description = `Booking Rejected!`
+      } else if (data.type === 'car') {
+        title = data.title
+        description = data.description
+        notification_type = data.type
+      } else if (data.type === 'Subscription Plan') {
+        title = data.title
+        description = data.description
+      } else if (data.type === 'Appointment') {
+        title = data.title
+        description = data.description
+        notification_type = data.notification_type
+      } else if (data.type === 'receive_payment') {
+        title = data.title
+        description = data.description
+        notification_type = data.type
+      } else if (data.type === "payment_out_of_date") {
+        title: data.title
+        description: data.description
+        notification_type = data.notification_type
+      } else if (data.type === "feedback_received") {
+        title = data.title
+        description = data.description
+        notification_type = data.notification_type
+      } else if (notification_type === "cancel_appointment") {
+        title = data.title
+        description: data.description
+        notification_type: data.notification_type
+      } else if (data.type === "remainder_appointment") {
+        title = data.title
+        description = data.description
+        notification_type = data.notification_type
+      }
+      else {
+        title = data.title
+        description = data.description
+      }
+
+      notificationObj.description = description
+      notificationObj.title = title
+      if (notification_type) {
+        notificationObj.notification_type = notification_type
+      }
+
+      try {
+        if (data.create) {
+          // delete data.create;
+          if (data.create_admin) {
+            notificationObj.is_admin = true
+            console.log(notificationObj)
+            await createItem(notifications, notificationObj)
+            console.log('create_admin')
           } else {
-            throw buildErrObject(422, "sender detail is null");
+            console.log('not')
+            await createItem(notifications, notificationObj)
           }
-        },
-        (error) => {
-          throw buildErrObject(422, error);
         }
-      )
-      .catch((err) => {
-        console.log("err: ", err);
-      });
-  } else {
-    throw buildErrObject(422, "--* no type *--");
+      } catch (err) {
+        console.log('main err: ', err)
+      }
+      fcmTokens = fcmTokens?.map((item) => item.token) || []
+      if (fcmTokens.length > 0) {
+        try {
+          if (data.user) {
+            fcmTokens.map(
+              async (item) =>
+                await sendPushNotification(
+                  item,
+                  notificationObj.title,
+                  notificationObj.description
+                )
+            )
+          } else {
+            fcmTokens.map(
+              async (item) =>
+                await sendAdminPushNotification(
+                  item,
+                  notificationObj.title,
+                  notificationObj.description
+                )
+            )
+          }
+        } catch (e) {
+          console.log(e, 'error')
+        }
+      }
+    } else {
+      throw buildErrObject(422, 'sender detail is null')
+    }
+  } catch (err) {
+    console.log(err.message, 'error')
+    throw buildErrObject(422, err.message)
   }
-};
+}
 exports.formatNumber = (number) => {
   if (number < 1000) {
     return number.toString();
@@ -1348,7 +1497,7 @@ exports.readAllNotifications = async (req, res) => {
       message: "Read all notifications",
       data: null,
     });
-  } catch (error) {}
+  } catch (error) { }
 };
 exports.deleteNotifications = async (req, res) => {
   try {
@@ -1867,7 +2016,7 @@ exports.numberOfInvoices = async (req, res) => {
       message: "data fetched successfully",
       data: data,
     });
-  } catch (error) {}
+  } catch (error) { }
 };
 exports.totalSales = async (req, res) => {
   try {
@@ -1923,7 +2072,7 @@ exports.totalSales = async (req, res) => {
       message: "data fetched successfully",
       data: data,
     });
-  } catch (error) {}
+  } catch (error) { }
 };
 exports.getTodayData = async (req, res) => {
   try {
@@ -2331,5 +2480,62 @@ exports.editVat = async (req, res) => {
     return res
       .status(500)
       .send({ code: 500, message: "Internal Server Error", error });
+  }
+};
+
+// new
+const Calendar = require("../models/calendar");
+const Client = require("../models/client");
+const {
+  sendAdminPushNotification,
+  sendPushNotification
+} = require('../../config/firebase')
+
+exports.sendRemainderForAppointments = async (req, res) => {
+  try {
+
+    const calendarId = req.params.id;
+    console.log("calendarId params", calendarId);
+    const appointment = await Calendar.findById(calendarId);
+    if (!appointment) {
+      return res.status(409).json({ message: "appointment not found!" });
+    }
+    console.log("appointment-->", appointment);
+    const { user_id, date, client_id } = appointment;
+
+    const client = await Client.findById(client_id);
+    if (!client) {
+      return res.status(409).json({ message: "client not found!" });
+    }
+
+    const formattedDate = new Date(date);
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    const dateFormatter = new Intl.DateTimeFormat('en-US', options);
+    const formattedDateString = dateFormatter.format(formattedDate);
+
+    const admin = await Admin.find();
+    if (admin.length === 0) {
+      return res.status(409).json({ message: "admin not found!" });
+    }
+
+    let notificationObj = {
+      sender_id: admin[0]._id,
+      // receiver_id: client_id.toString(),
+      receiver_id: user_id.toString(),
+      type: "remainder_appointment",
+      title: "remainder_appointment",
+      create: true,
+      create_admin: true,
+      typeId: req.params.id,
+      notification_type: "remainder_appointment",
+      description: `Dear ${client.firstName}, this is a soft reminder about your appointment on ${formattedDateString}`
+    };
+
+    console.log("before  saving", notificationObj);
+    await this._sendNotification(notificationObj);
+    return res.status(200).json({ message: "notification sent successfully!" });
+  } catch (err) {
+    console.log("an error occurred", err.message);
+    return res.status(500).json({ message: "internal server error", error: err.message });
   }
 };

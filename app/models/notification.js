@@ -40,7 +40,15 @@ const NotificationSchema = new mongoose.Schema(
         "contact",
         "car",
         "Subscription Plan",
-        "receive_payment"
+        "receive_payment",
+        "payment_out_of_date",
+        "feedback_received",
+        "cancel_appointment",
+        "remainder_appointment",
+        "quote_opened",
+        "quote_accepted",
+        "quote_expired", 
+        "maintenance_remainder"
       ],
       required: true,
     },
